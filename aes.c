@@ -17,7 +17,7 @@
  * outputs:
  * - None.
  ******************************************************************************/
-void print_state_matrix(state_matrix state)
+void print_state_matrix(byte state[4][4])
 {
     for (int row_idx = 0; row_idx < 4; row_idx++)
     {
@@ -39,7 +39,7 @@ void print_state_matrix(state_matrix state)
  * outputs:
  * - None.
  ******************************************************************************/
-void convert_to_state_matrix(const byte *input, state_matrix state)
+void convert_to_state_matrix(const byte *input, byte state[4][4])
 {
     /* Store the matrix in column-major order.
      * Column-major order = Each column stores the next 4 consecutive bytes.
@@ -63,7 +63,7 @@ void convert_to_state_matrix(const byte *input, state_matrix state)
  * outputs:
  * - None.
  ******************************************************************************/
-void convert_to_byte_array(state_matrix state, unsigned char *output)
+void convert_to_byte_array(byte state[4][4], unsigned char *output)
 {
 
     /* Convert the state matrix to a byte array.
@@ -274,8 +274,11 @@ byte *key_expansion(const byte *key, enum aes_key_size key_size)
      */
     int num_rounds = get_number_of_rounds(key_size);
 
-    /* Calculate the total number of words across all the round keys. */
-    int total_words = num_rounds * num_words;
+    /* Calculate the total number of words across all the round keys.
+     * A word is 4 bytes.
+     * Round keys will have 4 words since a round key is always 16 bytes.
+     */
+    int total_words = (num_rounds + 1) * 4;
 
     /* Array of state matrices to hold the round keys.
      * Each round key is 16 bytes regardless of the key size.
@@ -293,7 +296,8 @@ byte *key_expansion(const byte *key, enum aes_key_size key_size)
         byte *current_word = round_keys + (i * 4);
 
         /* Copy the last word
-         * This will be used the generate the current word 
+         * A word will always be 4 bytes regardless of the key size.
+         * This will be used the generate the current word
          */
         memcpy(current_word, current_word - 4, 4);
 
@@ -315,27 +319,15 @@ byte *key_expansion(const byte *key, enum aes_key_size key_size)
             current_word[0] ^= rcon_table[current_round];
         }
 
-        /* XOR the current word with the word n words before it 
-        * n = 4/6/8 for 128/192/256-bit keys
-        */
+        /* XOR the current word with the word n words before it
+         * n = 4/6/8 for 128/192/256-bit keys
+         */
         byte *prev_word = round_keys + (i - num_words) * 4;
         for (j = 0; j < 4; j++)
         {
             current_word[j] ^= prev_word[j];
         }
     }
-
-    // // Print the round keys
-    // printf("Round keys: ");
-    // for ( i = 0; i < num_rounds; i++ )
-    // {
-    //     printf("Round key %d: ", i);
-    //     for ( j = 0; j < 16; j++ )
-    //     {
-    //         printf("%02X ", round_keys[i * 16 + j]);
-    //     }
-    //     printf("\n");
-    // }
 
     /* Return the round keys. */
     return round_keys;
@@ -351,7 +343,7 @@ byte *key_expansion(const byte *key, enum aes_key_size key_size)
  * outputs:
  * - None.
  ******************************************************************************/
-void add_round_key(state_matrix state, const byte *round_key)
+void add_round_key(byte state[4][4], const byte *round_key)
 {
     /* XOR the given input with the round key. */
     int row_idx, col_idx;
@@ -374,7 +366,7 @@ void add_round_key(state_matrix state, const byte *round_key)
  * outputs:
  * - None.
  ******************************************************************************/
-void sub_bytes(state_matrix state)
+void sub_bytes(byte state[4][4])
 {
     /* Substitute each byte in the state matrix. */
     int row_idx, col_idx;
@@ -401,10 +393,10 @@ void sub_bytes(state_matrix state)
  * outputs:
  * - None.
  ******************************************************************************/
-void shift_rows(state_matrix state)
+void shift_rows(byte state[4][4])
 {
     /* New state matrix to store the shifted rows. */
-    state_matrix shifted_state;
+    byte shifted_state[4][4];
 
     /* First row is skipped since no bytes are shifted. */
     int row_idx, col_idx;
@@ -530,7 +522,7 @@ byte mix_column_gf_multiply(byte multiplier, byte state_byte)
  * outputs:
  * - None.
  ******************************************************************************/
-void mix_columns(state_matrix state)
+void mix_columns(byte state[4][4])
 {
     /* For each column of the state matrix. */
     int col;
@@ -585,33 +577,34 @@ byte *aes_encrypt(const byte *input, const byte *key, int key_size, byte *output
     byte *round_keys = key_expansion(key, key_size);
 
     /* Convert the input to a state matrix. */
-    state_matrix input_state;
+    byte input_state[4][4];
     convert_to_state_matrix(input, input_state);
 
     /* Add the initial round key to the input. */
     add_round_key(input_state, round_keys);
 
-    /* Loop based on the number of rounds 
+    /* Loop based on the number of rounds
      * Number of rounds depends on the key size.
      * 10/12/14 rounds for 128/192/256 bit keys.
-    */
+     */
     int num_rounds = get_number_of_rounds(key_size);
-    for (int i = 1; i < num_rounds + 1; i++)
+    int i;
+    for (i = 1; i < num_rounds + 1; i++)
     {
         /* SubBytes transformation. */
         sub_bytes(input_state);
 
         /* ShiftRows transformation. */
         shift_rows(input_state);
-      
+
         /* If this is not the last round, mix the columns. */
         if (i != num_rounds)
         {
             /* MixColumns transformation. */
             mix_columns(input_state);
         }
-        
-        /* Add the round key. */
+
+        /* Add the current round key. */
         add_round_key(input_state, round_keys + (i * 16));
     }
 
@@ -624,7 +617,7 @@ byte *aes_encrypt(const byte *input, const byte *key, int key_size, byte *output
     return output;
 }
 
-aes_encrypted_result aes_encrypt_bytes(const byte *input, int input_size, const byte *key, int key_size)
+aes_encrypted_result *aes_encrypt_bytes(const byte *input, int input_size, const byte *key, int key_size)
 {
 
     /* Assume key size is 128 bits. */
@@ -650,6 +643,7 @@ aes_encrypted_result aes_encrypt_bytes(const byte *input, int input_size, const 
     int i;
     for (i = 0; i < num_blocks - 1; i++)
     {
+        /* Encrypt the input in 16 byte increments. */
         aes_encrypt(input + (i * 16), key, key_size, output + (i * 16));
     }
 
@@ -657,18 +651,38 @@ aes_encrypted_result aes_encrypt_bytes(const byte *input, int input_size, const 
     byte padded_block[16];
     memset(padded_block, padding_length, 16);
 
+    // printf("padded block before encryption: ");
+    // for (int i = 0; i < 16; i++)
+    // {
+    //     printf("%02X ", padded_block[i]);
+    // }
+    // printf("\n");
+
     /* Copy the remaining data to the padded block. */
     memcpy(padded_block, input + (num_blocks - 1) * 16, input_size % 16);
-
-    /* Encrypt the last block. */
+    // for (int i = 0; i < 16; i++)
+    // {
+    //     printf("%02X ", padded_block[i]);
+    // }
+    // printf("\n");
+    // /* Encrypt the last block. */
     aes_encrypt(padded_block, key, key_size, output + ((num_blocks - 1) * 16));
+
+    // // show last output block
+    // printf("padded block after encryption: ");
+    // for (int i = 0; i < 16; i++)
+    // {
+    //     printf("%02X ", temp_output[i]);
+    // }
+    // printf("\n");
+    // exit(0);
 
     // NOTE this uses ECB mode which is different from CBC mode
 
     /* Create the result struct. */
-    struct aes_encrypted_result result;
-    result.bytes = output;
-    result.size = num_blocks * 16;
+    aes_encrypted_result *result = (aes_encrypted_result *)malloc(sizeof(aes_encrypted_result));
+    result->bytes = output;
+    result->size = num_blocks * 16;
 
     /* Return the encrypted output. */
     return result;

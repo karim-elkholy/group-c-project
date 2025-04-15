@@ -1,0 +1,4 @@
+
+Debugging command 
+
+gcc -g -o main.o *.c && valgrind ./main.o

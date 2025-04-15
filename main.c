@@ -30,14 +30,19 @@ int main()
         0x10, 0x11, 0x12, 0x13,
         0x14, 0x15, 0x16, 0x17};
 
-    aes_encrypted_result result = aes_encrypt_bytes(input_bytes, 16, key_bytes_24, 24);
+
+    aes_encrypted_result *result = aes_encrypt_bytes(input_bytes, 16, key_bytes_16, 16);
 
     // Print the encrypted blocks.
     printf("Encrypted Message: ");
     int i;
-    for ( i = 0; i < result.size; i++ )
+    for ( i = 0; i < result->size; i++ )
     {
-        printf("%02X ", result.bytes[i]);
+        printf("%02X ", result->bytes[i]);
     }
     printf("\n");
+
+    /* Free the result once finished */
+    free(result->bytes);
+    free(result);
 }
