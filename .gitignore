@@ -1,0 +1,10 @@
+.vscode/
+.env
+
+# Ignore executable files
+*.exe
+*.out
+*.o
+*.a
+*.so
+
