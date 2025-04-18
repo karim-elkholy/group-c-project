@@ -1,6 +1,9 @@
 .vscode/
 .env
 
+# Ignore build files 
+build/
+
 # Ignore executable files
 *.exe
 *.out
