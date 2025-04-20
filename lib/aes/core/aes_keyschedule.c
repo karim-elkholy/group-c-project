@@ -281,6 +281,12 @@ roundKeys_t *key_expansion(const unsigned char *key, int key_size)
     /* Generate the round keys */
     key_expansion_expand_keys(context, key);
 
+    /* Store the round keys */
+    roundKeys_t *round_keys = context->round_keys;
+
+    /* Free the context since round key generation is complete*/
+    free(context);
+
     /* Return the round keys */
-    return context->round_keys;
+    return round_keys;
 }

@@ -6,7 +6,7 @@
 #include "aes/core/aes.h"
 #include "aes/gcm.h"
 #include "utils/hex.h"
-
+#include "aes/core/aes_operations.h"
 
 void test_bytes_to_hex_str() {
     
@@ -128,11 +128,12 @@ void test_fips_example() {
             printf("Actual: %s\n", result_hex);
             exit(1);
         }
-    }
 
-    /* Free the keys */
-    for (i = 0; i < 3; i++) {
+        /* Free the result & the current key */
         free(keys[i]);
+        free(result->bytes);
+        free(result);
+        free(result_hex);
     }
 
     /* Free the input bytes */
@@ -168,6 +169,7 @@ void test_aes_128_encrypt() {
     }
 
     /* Free the result */
+    free(result->bytes);
     free(result);
     free(result_hex);
 }
@@ -201,6 +203,7 @@ void test_aes_192_encrypt() {
     }
 
     /* Free the result */
+    free(result->bytes);
     free(result);
     free(result_hex);
 }
@@ -234,20 +237,54 @@ void test_aes_256_encrypt() {
     }
 
     /* Free the result */
+    free(result->bytes);
     free(result);
     free(result_hex);
 }
 
-void test_aes_gcm_encrypt() {
+/* Taken from https://csrc.nist.rip/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-spec.pdf*/
+void test_aes_gcm_encrypt_case_2() {
     /* 16 byte message */
-    /* Plaintext: "Turtles are cool" */
-    const byte *msg = (byte *)"Turtles are cool";
-
+    /* All zeros */
+    const unsigned char plaintext[16] = {0};
+    
     /* 16 byte key */
-    /* Key: "Cats are weirdos" */
-    const byte *key = (byte *)"Cats are weirdos";
+    /* All zeros */
+    const unsigned char key[16] = {0};
 
-    aes_encrypt_gcm_bytes(msg, 16, key, 16);
+    /* Nonce to use for encryption */
+    const unsigned char nonce[12] = {0};
+
+    /* Encrypt the message */
+    aes_encrypt_gcm(plaintext, 16, key, 16, nonce);
+}
+
+/* Taken from https://csrc.nist.rip/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-spec.pdf*/
+void test_aes_gcm_encrypt_case_3() {
+    /* 60 byte message */
+    const unsigned char plaintext[64] = {
+        0xd9, 0x31, 0x32, 0x25, 0xf8, 0x84, 0x06, 0xe5, 0xa5, 0x59, 0x09, 0xc5, 0xaf, 0xf5, 0x26, 0x9a,
+        0x86, 0xa7, 0xa9, 0x53, 0x15, 0x34, 0xf7, 0xda, 0x2e, 0x4c, 0x30, 0x3d, 0x8a, 0x31, 0x8a, 0x72,
+        0x1c, 0x3c, 0x0c, 0x95, 0x95, 0x68, 0x09, 0x53, 0x2f, 0xcf, 0x0e, 0x24, 0x49, 0xa6, 0xb5, 0x25,
+        0xb1, 0x6a, 0xed, 0xf5, 0xaa, 0x0d, 0xe6, 0x57, 0xba, 0x63, 0x7b, 0x39, 0x1a, 0xaf, 0xd2, 0x55
+    };
+    
+    /* 16 byte key */
+    const unsigned char key[16] = {
+        0xfe, 0xff, 0xe9, 0x92, 0x86, 0x65, 0x73, 0x1c,
+        0x6d, 0x6a, 0x8f, 0x94, 0x67, 0x30, 0x83, 0x08
+    };
+    
+    /* 12 byte nonce */
+    const unsigned char nonce[12] = {
+        0xca, 0xfe, 0xba, 0xbe, 0xfa, 0xce, 0xdb, 0xad,
+        0xde, 0xca, 0xf8, 0x88
+    };
+    
+    /* Encrypt the message */
+    aes_encrypt_gcm(plaintext, 64, key, 16, nonce);
+    
+    
 }
 
 int main() {
@@ -259,7 +296,6 @@ int main() {
     #endif
 
     /* Test AES-GCM */
-    test_run_method("AES-GCM encrypt", test_aes_gcm_encrypt);
 
     test_run_method("convert bytes to hex string", test_bytes_to_hex_str);
     test_run_method("convert hex string to bytes", test_hex_str_to_bytes);
@@ -267,5 +303,9 @@ int main() {
     test_run_method("AES 128 encrypt", test_aes_128_encrypt);
     test_run_method("AES 192 encrypt", test_aes_192_encrypt);
     test_run_method("AES 256 encrypt", test_aes_256_encrypt);
+    test_run_method("AES-GCM encrypt case 2", test_aes_gcm_encrypt_case_3); 
+    test_run_method("AES-GCM encrypt case 3", test_aes_gcm_encrypt_case_3);
+
+
     return 0;
 }

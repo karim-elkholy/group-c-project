@@ -1,14 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 project(AES C)
 
-# Set C89/C90 standard for all projects
-set(CMAKE_C_STANDARD 90)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-
-# Enable CTest
-include(CTest)
-
 # Compiler flags applied to ALL targets
+# Taken from lab1
+# C Code must confirm to 1989 C standard
+add_compile_options(-ansi)
 # Treat warnings as errors
 add_compile_options(-Wall -Werror)
 # Adhere strictly to the above specified C standard
@@ -20,23 +16,17 @@ file(GLOB_RECURSE SOURCES
     "include/*.h"
 )
 
+
 # Enables debug mode 
 function(enable_debug target_name)
     target_compile_options(${target_name} PRIVATE -g)
-    target_compile_definitions(${target_name} PRIVATE DEBUG DEBUG_LEVEL_DEBUG=3)
+    target_compile_definitions(${target_name} PRIVATE DEBUG DEBUG_LEVEL=2)
 endfunction()
 
 # Define a library 
 function(create_lib target_name)
     add_library(${target_name} STATIC ${SOURCES})
     target_include_directories(${target_name} PUBLIC "${CMAKE_SOURCE_DIR}/include")
-endfunction()
-
-# Link libraries shared by both release & debug versions
-function(link_shared_libs target_name)
-    target_link_libraries(${target_name}
-        m #Math library
-    )
 endfunction()
 
 # Two versions of library 
@@ -53,8 +43,9 @@ add_executable(aes_debug "tests/test.c") #Test executable
 enable_debug(aes_debug)
 enable_debug(lib_code_debug)
 
-# Link libraries 
-link_shared_libs(aes_main)
+# Link custom library to the release & debug targets
 target_link_libraries(aes_main lib_code_release)
-link_shared_libs(aes_debug)
 target_link_libraries(aes_debug lib_code_debug)
+
+# Link math library to all targets
+link_libraries(m)

@@ -1,4 +1,8 @@
 #include "aes/core/aes_operations.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "aes/maths/gf.h"
 
 /* Lookup table for the AES S-box */
 /* Needed by getSubByte() to map the input byte to a substitution byte */
@@ -67,7 +71,6 @@ unsigned char getSubByte(unsigned char input)
     /* Return the value at the intersection of the row and column. */
     return sbox_table[highNibble * 16 + lowNibble];
 }
-
 
 /*******************************************************************************
  * Rotates a word to the left by one byte.
@@ -158,6 +161,7 @@ void sub_bytes(unsigned char state[4][4])
     }
 }
 
+
 /*******************************************************************************
  * ShiftRows transformation.
  * Shifts each row of the state matrix left:
@@ -197,87 +201,52 @@ void shift_rows(unsigned char state[4][4])
     }
 }
 
-/*******************************************************************************
- * Part of the MixColumns transformation.
- * 'xtime' implementation needed by the MixColumns transformation.
- * Specified in section 4.2 of the FIPS 197 standard.
- *
- * inputs:
- * - x - The byte to multiply.
- * outputs:
- * - The result of the multiplication.
- ******************************************************************************/
-unsigned char xtime(unsigned char x)
+
+unsigned char gf_multiply_2_8(const unsigned char a, const unsigned char b)
 {
-    /*
-     * Multiply the given byte by 2
-     * Equivalent to shifting the bits to the left by 1.
-     */
-    unsigned char shifted = x << 1;
+    /* Create the irreducible polynomial for GF(2^8) */
+    unsigned char irreducible[1] = {0x1B};
 
-    /* Check if x is greater or equal to 128 */
-    if (x & 0x80)
-    {
-        /* The maximum value that a byte can hold is 255.
-         * A number greater or equal to 128 multiplied by 2 would exceed 255.
-         * This would cause a byte overflow.
-         *
-         * XORing with 0x1b prevents this overflow.
-         * Now the multiplication is within a valid byte range.
-         */
-        shifted ^= 0x1b;
-    }
+    /* GF(2^8) only uses 8 bits so only 1 byte is used */
+    unsigned char a_array[1] = {a};
+    unsigned char b_array[1] = {b};
 
-    /* Return the result of the multiplication. */
-    return shifted;
+    /* Perform GF(2^8) multiplication */
+    unsigned char result[1] = {0};
+    galois_multiply(a_array, b_array, 1, irreducible, result);
+
+    /* Return the first byte of the result */
+    return result[0];
 }
 
-/*******************************************************************************
- * Part of the MixColumns transformation.
- * Implements Galois Field (2⁸) multiplication.
- *
- * inputs:
- * - multiplier - The multiplier.
- * - state_byte - The byte from the state matrix to multiply against.
- * outputs:
- * - The result of the multiplication.
- ******************************************************************************/
-unsigned char mix_column_gf_multiply(unsigned char multiplier, unsigned char state_byte)
+void gf_multiply_2_128(const unsigned char a[16], const unsigned char b[16], int n_bytes, unsigned char result[16])
 {
+    /* Create the irreducible polynomial */
+    unsigned char irreducible[16] = {0};
+    irreducible[0] = 0xe1;
 
-    /* Holds the result of the multiplication. */
-    unsigned char result = 0;
+    /* Perform the GF(2^128) multiplication */
+    galois_multiply(a, b, 16, irreducible, result);
 
-    /* After a finite number of shifts to the right.
-     * The multiplier will eventually become 0.
-     * This will break the loop.
-     */
-    while (multiplier)
-    {
+    /*
+    Intel
+    To reduce a 256-bit carry-less product modulo a polynomial g of degree 128,
+     we first split it into two 128-bit halves.
+     The least significant half is simply XOR-ed with the final remainder
+      (since the degree of g is 128).
+      For the most significant part,
+      we develop an algorithm that realizes division via two multiplications.
+       This algorithm can be seen as an extension of the Barrett reduction algorithm to modulo-2
+       arithmetic,
+       or as an extension of the Feldmeier CRC generation algorithm
+       to dividends and divisors of arbitrary size.
 
-        /* Check if the rightmost/least significant bit is 1
-         * Same as checking if the number is odd.
-         */
-        if (multiplier & 1)
-        {
-            /* Add the state byte to the result.
-             * XOR is the equivalent of addition in GF(2^8).
-             */
-            result ^= state_byte;
-        }
-
-        /* Perform the 'xtime' operation on the state byte. */
-        state_byte = xtime(state_byte);
-
-        /* Shift the multiplier to the right by 1 bit.
-         * This will process the next bit in the multiplier.
-         * Equivalent to dividing by 2.
-         */
-        multiplier >>= 1;
-    }
-
-    /* Return the result of the multiplication. */
-    return result;
+     If the product is greater than 255 we "reduce" it.
+    Reduction means we divide polynomials by the irreducible polynomial.
+    This division will give us a quotient and a remainder.
+    The remainder is the reduced result.
+    The quotient is discarded.
+      */
 }
 
 /*******************************************************************************
@@ -314,27 +283,27 @@ void mix_columns(unsigned char state[4][4])
 
         /* Calculate the mixed column values. */
         state[0][col] =
-            mix_column_gf_multiply(2, s_0) ^
-            mix_column_gf_multiply(3, s_1) ^
-            mix_column_gf_multiply(1, s_2) ^
-            mix_column_gf_multiply(1, s_3);
+            gf_multiply_2_8(2, s_0) ^
+            gf_multiply_2_8(3, s_1) ^
+            gf_multiply_2_8(1, s_2) ^
+            gf_multiply_2_8(1, s_3);
 
         state[1][col] =
-            mix_column_gf_multiply(1, s_0) ^
-            mix_column_gf_multiply(2, s_1) ^
-            mix_column_gf_multiply(3, s_2) ^
-            mix_column_gf_multiply(1, s_3);
+            gf_multiply_2_8(1, s_0) ^
+            gf_multiply_2_8(2, s_1) ^
+            gf_multiply_2_8(3, s_2) ^
+            gf_multiply_2_8(1, s_3);
 
         state[2][col] =
-            mix_column_gf_multiply(1, s_0) ^
-            mix_column_gf_multiply(1, s_1) ^
-            mix_column_gf_multiply(2, s_2) ^
-            mix_column_gf_multiply(3, s_3);
+            gf_multiply_2_8(1, s_0) ^
+            gf_multiply_2_8(1, s_1) ^
+            gf_multiply_2_8(2, s_2) ^
+            gf_multiply_2_8(3, s_3);
 
         state[3][col] =
-            mix_column_gf_multiply(3, s_0) ^
-            mix_column_gf_multiply(1, s_1) ^
-            mix_column_gf_multiply(1, s_2) ^
-            mix_column_gf_multiply(2, s_3);
+            gf_multiply_2_8(3, s_0) ^
+            gf_multiply_2_8(1, s_1) ^
+            gf_multiply_2_8(1, s_2) ^
+            gf_multiply_2_8(2, s_3);
     }
 }

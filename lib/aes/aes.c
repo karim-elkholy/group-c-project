@@ -6,28 +6,7 @@
 #include "aes/core/aes.h"
 #include "aes/core/aes_keyschedule.h"
 #include "aes/core/aes_operations.h"
-
-/*******************************************************************************
- * Prints the state matrix.
- * TODO - Remove this function once finished.
- *
- * inputs:
- * - state_matrix - The state matrix to print
- * outputs:
- * - None.
- ******************************************************************************/
-void print_state_matrix(byte state[4][4])
-{
-    int row_idx, col_idx;
-    for (row_idx = 0; row_idx < 4; row_idx++)
-    {
-        for (col_idx = 0; col_idx < 4; col_idx++)
-        {
-            printf("%02X ", state[row_idx][col_idx]);
-        }
-        printf("\n");
-    }
-}
+#include "aes/maths/gf.h"
 
 /*******************************************************************************
  * Transforms an array of bytes to a state matrix.
@@ -38,7 +17,7 @@ void print_state_matrix(byte state[4][4])
  * - state - The state matrix to store the result.
  * outputs:
  * - None.
- ******************************************************************************/
+*******************************************************************************/
 void convert_bytes_to_state_matrix(const byte *input, byte state[4][4])
 {
     /* Store the matrix in column-major order.
@@ -62,7 +41,7 @@ void convert_bytes_to_state_matrix(const byte *input, byte state[4][4])
  * - output - The array of bytes to store the result.
  * outputs:
  * - None.
- ******************************************************************************/
+*******************************************************************************/
 void convert_to_byte_array(byte state[4][4], unsigned char *output)
 {
 
@@ -87,7 +66,7 @@ void convert_to_byte_array(byte state[4][4], unsigned char *output)
  * - output - The output to store the encrypted data.
  * outputs:
  * - None.
- ******************************************************************************/
+*******************************************************************************/
 void aes_encrypt(const byte *input, const byte *key, int key_size, byte *output)
 {
     /* Declare variables */
@@ -135,7 +114,7 @@ void aes_encrypt(const byte *input, const byte *key, int key_size, byte *output)
 }
 
 /*******************************************************************************
- * AES decryption function.
+ * AES decryption function. TODO
  *
  * inputs:
  * - input - The input to decrypt. Must be 16 bytes long.
@@ -143,7 +122,7 @@ void aes_encrypt(const byte *input, const byte *key, int key_size, byte *output)
  * - output - The output to store the decrypted data.
  * outputs:
  * - The decrypted output.
- ******************************************************************************/
+*******************************************************************************/
 /*
 byte *aes_decrypt(const byte *input, const byte *key, int key_size, byte *output)
 {
@@ -151,7 +130,8 @@ byte *aes_decrypt(const byte *input, const byte *key, int key_size, byte *output
 }
 */
 
-aes_encrypted_result *aes_encrypt_bytes(const byte *input, int input_size, const byte *key, int key_size)
+aes_encrypted_result *aes_encrypt_bytes(
+    const byte *input, int input_size, const byte *key, int key_size)
 {
     /* Declare variables */
     aes_encrypted_result *result;
