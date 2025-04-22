@@ -242,6 +242,31 @@ void test_aes_256_encrypt() {
     free(result_hex);
 }
 
+void test_aes_gcm_all() {
+
+    /* Ignore this it is being worked on */
+    
+    /* Number of test cases */
+    const int num_test_cases = 3;
+
+    /* List to hold plaintext for each test case */
+    unsigned char **plaintexts = malloc(num_test_cases * sizeof(unsigned char *));
+
+    /* List to hold key for each test case */
+    unsigned char **keys = malloc(num_test_cases * sizeof(unsigned char *));
+
+    /* List to hold nonce for each test case */
+    unsigned char **nonces = malloc(num_test_cases * sizeof(unsigned char *));
+
+    /* List to hold AAD for each test case */
+    unsigned char **aads = malloc(num_test_cases * sizeof(unsigned char *));
+
+    /* List to hold expected ciphertext for each test case */
+    unsigned char **expected_ciphertexts = malloc(num_test_cases * sizeof(unsigned char *));
+    
+    
+}
+
 /* Taken from https://csrc.nist.rip/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-spec.pdf*/
 void test_aes_gcm_encrypt_case_2() {
     /* 16 byte message */
