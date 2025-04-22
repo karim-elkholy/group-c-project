@@ -4,15 +4,9 @@
 #include "core.h"
 
 void addPatient(patient_t *patients, int *num_patients) {
-    /* This function is unused if you're using dynamic allocation
-       via ask_patient_details(). Integration occurs in user_input.c,
-       so this can remain empty or be removed if unnecessary. */
 }
 
 void addDoctor(doctor_t *doctors, int *num_doctors) {
-    /* This function is unused if you're using dynamic allocation
-       via ask_doctor_details(). Integration occurs in user_input.c,
-       so this can remain empty or be removed if unnecessary. */
 }
 
 void delete_patient(patient_t *patient) {
