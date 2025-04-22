@@ -8,31 +8,47 @@ Comments can be like this.
 > // This is a comment
 
 # Git How To Use
+## Getting started
 
-Will be explaining Git using a video game analogy.
+### Install git on your machine.
+  - Linux: sudo apt-get install git -y
+  - Windows: https://git-scm.com/downloads/win
 
-Git allows you to make saves of your code similar to a video game.
+Open VSCode and open the terminal. 
 
- Use below commands to upload any changes you made 
+> git clone 'https://project.url'
+
+project.url = Project URL you want to clone.
+
+You now have a local copy of the project.
+
+## Updating your local copy 
+
+To update the local copy with the latest changes from the remote copy.
+> git pull
+
+## Saving your changes
+
+To save your changes made to the local copy.
+1. Add all the changes you made to the local copy.
+> git add --all .
+
+2. Commit the changes.
+> git commit 
+
+3. Push the changes to the remote copy.
+> git push
+
+Now the remote copy of the project is updated with your changes.
+
+
+
+
+ To merge your changes with the latest version of the code.
 1. Sets Git to use VSCode for writing your commit messages
   > git config --global core.editor "code --wait" 
 
-2. Updates our git repo with your work.
 
-Marks all files in current dir aka(.) to be included in the savefile.
->git add --all .
-
-Perform the actual save aka git will ask you what to name your savefile or a description of the changes you made.
->git commit 
-
-3. Synchronizes local repo on ur pc with the remote repo on ur pc 
-
-This tells Git to synchronize your local save file with the cloud save file.
-
-Same as pushing your local game save file to Steam cloud save files.
-
-Now everyone in group can use your save files.
->git push 
 
 
 
