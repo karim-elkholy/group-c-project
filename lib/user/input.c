@@ -1,144 +1,204 @@
+/*******************************************************************************
+ * File: input.c
+ * Description: Handles input collection and validation for hospital app.
+ * Author: Keiron Lee
+ ******************************************************************************/
 
-#include "user/core.h"
-#include "user/input.h"
-/* Functions used: malloc, free */
-#include <stdlib.h>
-
-/* Functions used: printf, fopen, fclose, fprintf, fscanf */
 #include <stdio.h>
-
-/* Functions used: strlen, strcpy, strncpy, sprintf */
+#include <stdlib.h>
 #include <string.h>
+#include "input.h"
 
 /*******************************************************************************
- * Main
- *******************************************************************************/
-int main(void)
-{
-
-	/* Settings
-	 * The name of the database file */
-	char dbFileName[] = "database";
-
-	/* Use the program */
-	use(dbFileName);
-
-	return 0;
+ * Function: strdup_c90
+ * --------------------
+ * ANSI C-compatible replacement for strdup().
+ * Allocates and copies a string.
+ * Author: Keiron Lee
+ ******************************************************************************/
+char *strdup_c90(const char *s) {
+    char *copy = (char *)malloc(strlen(s) + 1);
+    if (copy != NULL) {
+        strcpy(copy, s);
+    }
+    return copy;
 }
 
 /*******************************************************************************
- * Function to use the library command-line program.
- *
- * inputs:
- * - dbFileName - The name of the database file
- * outputs:
- * - none
- *******************************************************************************/
-void use(const char *dbFileName)
-{
-	/* Show the available choices */
-	printMenu();
+ * Function: ask_patient_details
+ * -----------------------------
+ * Prompts user to enter patient details and returns a filled patient struct.
+ * Author: Keiron Lee
+ ******************************************************************************/
+patient_t *ask_patient_details() {
+    patient_t *p = (patient_t *)malloc(sizeof(patient_t));
+    char buffer[256];
 
-    //todo replace with patients and doctors instead of books
+    printf("Enter name: ");
+    fgets(buffer, sizeof(buffer), stdin);
+    buffer[strcspn(buffer, "\n")] = '\0';
+    p->name = strdup_c90(buffer);
 
-	/* Allocate memory for the books */
-	book_t *books = (book_t *)malloc(MAX_LIBRARY_SIZE * sizeof(book_t));
-	int book_count = 0;
+    printf("Enter address: ");
+    fgets(buffer, sizeof(buffer), stdin);
+    buffer[strcspn(buffer, "\n")] = '\0';
+    p->address = strdup_c90(buffer);
 
-	/* Get the user's choice */
-	char choice;
-	while ((choice = readChoice()) != '6')
-	{
+    printf("Enter phone number: ");
+    fgets(buffer, sizeof(buffer), stdin);
+    buffer[strcspn(buffer, "\n")] = '\0';
+    while (!is_valid_phone_number(buffer)) {
+        printf("Invalid. Re-enter phone number: ");
+        fgets(buffer, sizeof(buffer), stdin);
+        buffer[strcspn(buffer, "\n")] = '\0';
+    }
+    p->phone = strdup_c90(buffer);
 
-		/* Process the menu choice */
-		switch (choice)
-		{
-		case '1':
-			addBook(books, &book_count);
-			break;
-		case '2':
-			/* Delete the last book */
-			deleteLastBook(&book_count);
-			break;
-		case '3':
-			/* Display the book list */
-			displayBookList(books, book_count);
-			break;
-		case '4':
-			/* Save the book list to the database */
-			saveBookList(books, book_count, dbFileName);
-			break;
-		case '5':
-			/* Read the book list from the database */
-			readBookList(books, &book_count, dbFileName);
-			break;
-		default:
-			printf("Invalid choice.\n");
-			break;
-		}
-		/* Show the menu again after each operation */
-		printMenu();
-	}
+    printf("Enter email: ");
+    fgets(buffer, sizeof(buffer), stdin);
+    buffer[strcspn(buffer, "\n")] = '\0';
+    while (!is_valid_email(buffer)) {
+        printf("Invalid. Re-enter email: ");
+        fgets(buffer, sizeof(buffer), stdin);
+        buffer[strcspn(buffer, "\n")] = '\0';
+    }
+    p->email = strdup_c90(buffer);
 
-	/* Once the user has exited the program, free the allocated memory
-	 * Failing to do this will lead to memory leaks */
-	free(books);
+    printf("Enter password: ");
+    fgets(buffer, sizeof(buffer), stdin);
+    buffer[strcspn(buffer, "\n")] = '\0';
+    p->password = strdup_c90(buffer);
+
+    printf("Enter blood type (A, B, AB, O): ");
+    fgets(buffer, sizeof(buffer), stdin);
+    buffer[strcspn(buffer, "\n")] = '\0';
+    while (!is_valid_blood_type(buffer)) {
+        printf("Invalid. Re-enter blood type: ");
+        fgets(buffer, sizeof(buffer), stdin);
+        buffer[strcspn(buffer, "\n")] = '\0';
+    }
+    p->blood_type = strdup_c90(buffer);
+
+    printf("Enter date of birth (DD/MM/YYYY): ");
+    fgets(buffer, sizeof(buffer), stdin);
+    buffer[strcspn(buffer, "\n")] = '\0';
+    p->date_of_birth = strdup_c90(buffer);
+
+    printf("Enter gender (Male, Female, Other): ");
+    fgets(buffer, sizeof(buffer), stdin);
+    buffer[strcspn(buffer, "\n")] = '\0';
+    while (!is_valid_gender(buffer)) {
+        printf("Invalid. Re-enter gender: ");
+        fgets(buffer, sizeof(buffer), stdin);
+        buffer[strcspn(buffer, "\n")] = '\0';
+    }
+    p->gender = strdup_c90(buffer);
+
+    printf("Enter weight (kg): ");
+    fgets(buffer, sizeof(buffer), stdin);
+    p->weight = (float)atof(buffer);
+
+    p->allergies = NULL;
+    p->medications = NULL;
+
+    return p;
 }
 
 /*******************************************************************************
- * Used to read the user's choice.
- *
- * inputs:
- * - none
- * outputs:
- * - The user's choice
- *******************************************************************************/
-char readChoice(void)
-{
+ * Function: ask_doctor_details
+ * ----------------------------
+ * Prompts user to enter doctor details and returns a filled doctor struct.
+ * Author: Keiron Lee
+ ******************************************************************************/
+doctor_t *ask_doctor_details() {
+    doctor_t *d = (doctor_t *)malloc(sizeof(doctor_t));
+    char buffer[256];
 
-	/* Read the user's choice
-	 * The user might enter a sentence instead of a single character
-	 * To minimise the chance of buffer overflow, 256 characters are used */
-	char choice[256];
-	printf("Enter your choice>\n");
+    printf("Enter name: ");
+    fgets(buffer, sizeof(buffer), stdin);
+    buffer[strcspn(buffer, "\n")] = '\0';
+    d->name = strdup_c90(buffer);
 
-	/* Exit with an error code if the user's input could not be read */
-	if (fgets(choice, sizeof(choice), stdin) == NULL)
-	{
-		exit(1);
-	}
+    printf("Enter address: ");
+    fgets(buffer, sizeof(buffer), stdin);
+    buffer[strcspn(buffer, "\n")] = '\0';
+    d->address = strdup_c90(buffer);
 
-	/* Remove the newline character captured as part of fgets */
-	choice[strcspn(choice, "\n")] = '\0';
+    printf("Enter phone number: ");
+    fgets(buffer, sizeof(buffer), stdin);
+    buffer[strcspn(buffer, "\n")] = '\0';
+    while (!is_valid_phone_number(buffer)) {
+        printf("Invalid. Re-enter phone number: ");
+        fgets(buffer, sizeof(buffer), stdin);
+        buffer[strcspn(buffer, "\n")] = '\0';
+    }
+    d->phone = strdup_c90(buffer);
 
-	/* If more than a single character is entered */
-	if (strlen(choice) > 1)
-	{
-		/* Return an invalid character
-		 * This will force the user to enter a valid choice
-		 * A valid choice is a single character */
-		return '\0';
-	}
+    printf("Enter email: ");
+    fgets(buffer, sizeof(buffer), stdin);
+    buffer[strcspn(buffer, "\n")] = '\0';
+    while (!is_valid_email(buffer)) {
+        printf("Invalid. Re-enter email: ");
+        fgets(buffer, sizeof(buffer), stdin);
+        buffer[strcspn(buffer, "\n")] = '\0';
+    }
+    d->email = strdup_c90(buffer);
 
-	/* Return the first character */
-	return choice[0];
+    printf("Enter password: ");
+    fgets(buffer, sizeof(buffer), stdin);
+    buffer[strcspn(buffer, "\n")] = '\0';
+    d->password = strdup_c90(buffer);
+
+    printf("Enter specialization: ");
+    fgets(buffer, sizeof(buffer), stdin);
+    buffer[strcspn(buffer, "\n")] = '\0';
+    d->specialization = strdup_c90(buffer);
+
+    return d;
 }
 
 /*******************************************************************************
- * This function prints the initial menu with all instructions on how to use
- * this program.
- * inputs:
- * - none
- * outputs:
- * - none
- *******************************************************************************/
-void printMenu(void)
-{
-	printf("\nLibrary Management System \n"
-		   "1. Add book\n"
-		   "2. Delete last book\n"
-		   "3. Display book list\n"
-		   "4. Save the book list to the database\n"
-		   "5. Read the book list from the database\n"
-		   "6. Exit the program\n");
+ * Function: is_valid_blood_type
+ * -----------------------------
+ * Checks whether a string is a valid blood type.
+ * Author: Keiron Lee
+ ******************************************************************************/
+int is_valid_blood_type(char *b) {
+    return strcmp(b, "A") == 0 || strcmp(b, "B") == 0 ||
+           strcmp(b, "AB") == 0 || strcmp(b, "O") == 0;
+}
+
+/*******************************************************************************
+ * Function: is_valid_gender
+ * -------------------------
+ * Checks whether a string is a valid gender value.
+ * Author: Keiron Lee
+ ******************************************************************************/
+int is_valid_gender(char *g) {
+    return strcmp(g, "Male") == 0 || strcmp(g, "Female") == 0 ||
+           strcmp(g, "Other") == 0;
+}
+
+/*******************************************************************************
+ * Function: is_valid_email
+ * ------------------------
+ * Checks whether an email contains '@' and '.' characters.
+ * Author: Keiron Lee
+ ******************************************************************************/
+int is_valid_email(char *e) {
+    return strchr(e, '@') != NULL && strchr(e, '.') != NULL;
+}
+
+/*******************************************************************************
+ * Function: is_valid_phone_number
+ * -------------------------------
+ * Checks whether the input is a numeric phone number with at least 8 digits.
+ * Author: Keiron Lee
+ ******************************************************************************/
+int is_valid_phone_number(char *p) {
+    int i;
+    for (i = 0; p[i] != '\0'; i++) {
+        if (p[i] < '0' || p[i] > '9') return 0;
+    }
+    return i >= 8;
 }
