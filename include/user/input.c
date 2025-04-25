@@ -1,8 +1,21 @@
+/*******************************************************************************
+ * File: input.c
+ * Description: Handles input collection and validation for hospital app.
+ * Author: Keiron Lee
+ ******************************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "input.h"
 
+/*******************************************************************************
+ * Function: strdup_c90
+ * --------------------
+ * ANSI C-compatible replacement for strdup().
+ * Allocates and copies a string.
+ * Author: Keiron Lee
+ ******************************************************************************/
 char *strdup_c90(const char *s) {
     char *copy = (char *)malloc(strlen(s) + 1);
     if (copy != NULL) {
@@ -11,6 +24,12 @@ char *strdup_c90(const char *s) {
     return copy;
 }
 
+/*******************************************************************************
+ * Function: ask_patient_details
+ * -----------------------------
+ * Prompts user to enter patient details and returns a filled patient struct.
+ * Author: Keiron Lee
+ ******************************************************************************/
 patient_t *ask_patient_details() {
     patient_t *p = (patient_t *)malloc(sizeof(patient_t));
     char buffer[256];
@@ -85,6 +104,12 @@ patient_t *ask_patient_details() {
     return p;
 }
 
+/*******************************************************************************
+ * Function: ask_doctor_details
+ * ----------------------------
+ * Prompts user to enter doctor details and returns a filled doctor struct.
+ * Author: Keiron Lee
+ ******************************************************************************/
 doctor_t *ask_doctor_details() {
     doctor_t *d = (doctor_t *)malloc(sizeof(doctor_t));
     char buffer[256];
@@ -132,20 +157,44 @@ doctor_t *ask_doctor_details() {
     return d;
 }
 
+/*******************************************************************************
+ * Function: is_valid_blood_type
+ * -----------------------------
+ * Checks whether a string is a valid blood type.
+ * Author: Keiron Lee
+ ******************************************************************************/
 int is_valid_blood_type(char *b) {
     return strcmp(b, "A") == 0 || strcmp(b, "B") == 0 ||
            strcmp(b, "AB") == 0 || strcmp(b, "O") == 0;
 }
 
+/*******************************************************************************
+ * Function: is_valid_gender
+ * -------------------------
+ * Checks whether a string is a valid gender value.
+ * Author: Keiron Lee
+ ******************************************************************************/
 int is_valid_gender(char *g) {
     return strcmp(g, "Male") == 0 || strcmp(g, "Female") == 0 ||
            strcmp(g, "Other") == 0;
 }
 
+/*******************************************************************************
+ * Function: is_valid_email
+ * ------------------------
+ * Checks whether an email contains '@' and '.' characters.
+ * Author: Keiron Lee
+ ******************************************************************************/
 int is_valid_email(char *e) {
     return strchr(e, '@') != NULL && strchr(e, '.') != NULL;
 }
 
+/*******************************************************************************
+ * Function: is_valid_phone_number
+ * -------------------------------
+ * Checks whether the input is a numeric phone number with at least 8 digits.
+ * Author: Keiron Lee
+ ******************************************************************************/
 int is_valid_phone_number(char *p) {
     int i;
     for (i = 0; p[i] != '\0'; i++) {
