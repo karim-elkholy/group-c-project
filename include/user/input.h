@@ -18,3 +18,5 @@ int is_valid_phone_number(char *phone_number);
 
 /* Entry point for the program. Will prompt choices from here */
 void use();
+
+#endif
