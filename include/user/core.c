@@ -3,6 +3,14 @@
 #include <string.h>
 #include "core.h"
 
+char *strdup(const char *s) {
+    char *copy = (char *)malloc(strlen(s) + 1);
+    if (copy != NULL) {
+        strcpy(copy, s);
+    }
+    return copy;
+}
+
 void addPatient(patient_t *patients, int *num_patients) {
 }
 
