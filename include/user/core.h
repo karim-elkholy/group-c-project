@@ -8,22 +8,22 @@ struct patient {
     char *email;
     char *password;
 
-    // Blood type
+    /* Blood type */
     char *blood_type;
 
-    // Date of birth
+    /* Date of birth */
     char *date_of_birth;
 
-    // Gender
+    /* Gender */
     char *gender;
 
-    // Weight
+    /* Weight */
     float weight;
 
-    // Allergies 
+    /* Allergies */ 
     char **allergies;
 
-    // Medications 
+    /* Medications */
     char **medications;
 
     
