@@ -1,9 +1,22 @@
+/*******************************************************************************
+ * File: core.c
+ * Description: Core data logic for patient and doctor management system.
+ * Author: Keiron Lee
+ ******************************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "core.h"
 
-char *strdup(const char *s) {
+/*******************************************************************************
+ * Function: strdup_c90
+ * --------------------
+ * ANSI C-compatible replacement for strdup().
+ * Allocates and copies a string.
+ * Author: Keiron Lee
+ ******************************************************************************/
+char *strdup_c90(const char *s) {
     char *copy = (char *)malloc(strlen(s) + 1);
     if (copy != NULL) {
         strcpy(copy, s);
@@ -11,12 +24,30 @@ char *strdup(const char *s) {
     return copy;
 }
 
+/*******************************************************************************
+ * Function: addPatient
+ * --------------------
+ * Empty placeholder for compatibility with original function declarations.
+ * Author: Keiron Lee
+ ******************************************************************************/
 void addPatient(patient_t *patients, int *num_patients) {
 }
 
+/*******************************************************************************
+ * Function: addDoctor
+ * -------------------
+ * Empty placeholder for compatibility with original function declarations.
+ * Author: Keiron Lee
+ ******************************************************************************/
 void addDoctor(doctor_t *doctors, int *num_doctors) {
 }
 
+/*******************************************************************************
+ * Function: delete_patient
+ * ------------------------
+ * Frees all dynamically allocated memory for a patient.
+ * Author: Keiron Lee
+ ******************************************************************************/
 void delete_patient(patient_t *patient) {
     if (patient != NULL) {
         free(patient->name);
@@ -33,6 +64,12 @@ void delete_patient(patient_t *patient) {
     }
 }
 
+/*******************************************************************************
+ * Function: delete_doctor
+ * ------------------------
+ * Frees all dynamically allocated memory for a doctor.
+ * Author: Keiron Lee
+ ******************************************************************************/
 void delete_doctor(doctor_t *doctor) {
     if (doctor != NULL) {
         free(doctor->name);
@@ -45,6 +82,12 @@ void delete_doctor(doctor_t *doctor) {
     }
 }
 
+/*******************************************************************************
+ * Function: display_patients
+ * --------------------------
+ * Prints details of all patients in a readable format.
+ * Author: Keiron Lee
+ ******************************************************************************/
 void display_patients(patient_t *patients[], int num_patients) {
     int i;
     for (i = 0; i < num_patients; i++) {
@@ -60,6 +103,12 @@ void display_patients(patient_t *patients[], int num_patients) {
     }
 }
 
+/*******************************************************************************
+ * Function: display_doctors
+ * -------------------------
+ * Prints details of all doctors in a readable format.
+ * Author: Keiron Lee
+ ******************************************************************************/
 void display_doctors(doctor_t *doctors[], int num_doctors) {
     int i;
     for (i = 0; i < num_doctors; i++) {
@@ -72,9 +121,16 @@ void display_doctors(doctor_t *doctors[], int num_doctors) {
     }
 }
 
+/*******************************************************************************
+ * Function: save_data
+ * -------------------
+ * Saves patient and doctor data to a text file in a delimited format.
+ * Author: Keiron Lee
+ ******************************************************************************/
 void save_data(patient_t *patients[], int num_patients, doctor_t *doctors[], int num_doctors) {
     FILE *fp = fopen("hospital_data.txt", "w");
     int i;
+
     if (fp == NULL) return;
 
     fprintf(fp, "PATIENTS %d\n", num_patients);
@@ -105,6 +161,12 @@ void save_data(patient_t *patients[], int num_patients, doctor_t *doctors[], int
     fclose(fp);
 }
 
+/*******************************************************************************
+ * Function: load_data
+ * -------------------
+ * Loads patient and doctor data from a text file and populates memory.
+ * Author: Keiron Lee
+ ******************************************************************************/
 void load_data(patient_t *patients[], int num_patients, doctor_t *doctors[], int num_doctors) {
     FILE *fp = fopen("hospital_data.txt", "r");
     int i, count;
@@ -118,14 +180,14 @@ void load_data(patient_t *patients[], int num_patients, doctor_t *doctors[], int
         buffer[strcspn(buffer, "\n")] = '\0';
 
         patients[i] = (patient_t *)malloc(sizeof(patient_t));
-        patients[i]->name = strdup(strtok(buffer, "|"));
-        patients[i]->address = strdup(strtok(NULL, "|"));
-        patients[i]->phone = strdup(strtok(NULL, "|"));
-        patients[i]->email = strdup(strtok(NULL, "|"));
-        patients[i]->password = strdup(strtok(NULL, "|"));
-        patients[i]->blood_type = strdup(strtok(NULL, "|"));
-        patients[i]->date_of_birth = strdup(strtok(NULL, "|"));
-        patients[i]->gender = strdup(strtok(NULL, "|"));
+        patients[i]->name = strdup_c90(strtok(buffer, "|"));
+        patients[i]->address = strdup_c90(strtok(NULL, "|"));
+        patients[i]->phone = strdup_c90(strtok(NULL, "|"));
+        patients[i]->email = strdup_c90(strtok(NULL, "|"));
+        patients[i]->password = strdup_c90(strtok(NULL, "|"));
+        patients[i]->blood_type = strdup_c90(strtok(NULL, "|"));
+        patients[i]->date_of_birth = strdup_c90(strtok(NULL, "|"));
+        patients[i]->gender = strdup_c90(strtok(NULL, "|"));
         patients[i]->weight = (float)atof(strtok(NULL, "|"));
     }
 
@@ -135,12 +197,12 @@ void load_data(patient_t *patients[], int num_patients, doctor_t *doctors[], int
         buffer[strcspn(buffer, "\n")] = '\0';
 
         doctors[i] = (doctor_t *)malloc(sizeof(doctor_t));
-        doctors[i]->name = strdup(strtok(buffer, "|"));
-        doctors[i]->address = strdup(strtok(NULL, "|"));
-        doctors[i]->phone = strdup(strtok(NULL, "|"));
-        doctors[i]->email = strdup(strtok(NULL, "|"));
-        doctors[i]->password = strdup(strtok(NULL, "|"));
-        doctors[i]->specialization = strdup(strtok(NULL, "|"));
+        doctors[i]->name = strdup_c90(strtok(buffer, "|"));
+        doctors[i]->address = strdup_c90(strtok(NULL, "|"));
+        doctors[i]->phone = strdup_c90(strtok(NULL, "|"));
+        doctors[i]->email = strdup_c90(strtok(NULL, "|"));
+        doctors[i]->password = strdup_c90(strtok(NULL, "|"));
+        doctors[i]->specialization = strdup_c90(strtok(NULL, "|"));
     }
 
     fclose(fp);
