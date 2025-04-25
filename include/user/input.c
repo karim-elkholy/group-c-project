@@ -3,6 +3,14 @@
 #include <string.h>
 #include "input.h"
 
+char *strdup_c90(const char *s) {
+    char *copy = (char *)malloc(strlen(s) + 1);
+    if (copy != NULL) {
+        strcpy(copy, s);
+    }
+    return copy;
+}
+
 patient_t *ask_patient_details() {
     patient_t *p = (patient_t *)malloc(sizeof(patient_t));
     char buffer[256];
@@ -10,12 +18,12 @@ patient_t *ask_patient_details() {
     printf("Enter name: ");
     fgets(buffer, sizeof(buffer), stdin);
     buffer[strcspn(buffer, "\n")] = '\0';
-    p->name = strdup(buffer);
+    p->name = strdup_c90(buffer);
 
     printf("Enter address: ");
     fgets(buffer, sizeof(buffer), stdin);
     buffer[strcspn(buffer, "\n")] = '\0';
-    p->address = strdup(buffer);
+    p->address = strdup_c90(buffer);
 
     printf("Enter phone number: ");
     fgets(buffer, sizeof(buffer), stdin);
@@ -25,7 +33,7 @@ patient_t *ask_patient_details() {
         fgets(buffer, sizeof(buffer), stdin);
         buffer[strcspn(buffer, "\n")] = '\0';
     }
-    p->phone = strdup(buffer);
+    p->phone = strdup_c90(buffer);
 
     printf("Enter email: ");
     fgets(buffer, sizeof(buffer), stdin);
@@ -35,12 +43,12 @@ patient_t *ask_patient_details() {
         fgets(buffer, sizeof(buffer), stdin);
         buffer[strcspn(buffer, "\n")] = '\0';
     }
-    p->email = strdup(buffer);
+    p->email = strdup_c90(buffer);
 
     printf("Enter password: ");
     fgets(buffer, sizeof(buffer), stdin);
     buffer[strcspn(buffer, "\n")] = '\0';
-    p->password = strdup(buffer);
+    p->password = strdup_c90(buffer);
 
     printf("Enter blood type (A, B, AB, O): ");
     fgets(buffer, sizeof(buffer), stdin);
@@ -50,12 +58,12 @@ patient_t *ask_patient_details() {
         fgets(buffer, sizeof(buffer), stdin);
         buffer[strcspn(buffer, "\n")] = '\0';
     }
-    p->blood_type = strdup(buffer);
+    p->blood_type = strdup_c90(buffer);
 
     printf("Enter date of birth (DD/MM/YYYY): ");
     fgets(buffer, sizeof(buffer), stdin);
     buffer[strcspn(buffer, "\n")] = '\0';
-    p->date_of_birth = strdup(buffer);
+    p->date_of_birth = strdup_c90(buffer);
 
     printf("Enter gender (Male, Female, Other): ");
     fgets(buffer, sizeof(buffer), stdin);
@@ -65,7 +73,7 @@ patient_t *ask_patient_details() {
         fgets(buffer, sizeof(buffer), stdin);
         buffer[strcspn(buffer, "\n")] = '\0';
     }
-    p->gender = strdup(buffer);
+    p->gender = strdup_c90(buffer);
 
     printf("Enter weight (kg): ");
     fgets(buffer, sizeof(buffer), stdin);
@@ -84,12 +92,12 @@ doctor_t *ask_doctor_details() {
     printf("Enter name: ");
     fgets(buffer, sizeof(buffer), stdin);
     buffer[strcspn(buffer, "\n")] = '\0';
-    d->name = strdup(buffer);
+    d->name = strdup_c90(buffer);
 
     printf("Enter address: ");
     fgets(buffer, sizeof(buffer), stdin);
     buffer[strcspn(buffer, "\n")] = '\0';
-    d->address = strdup(buffer);
+    d->address = strdup_c90(buffer);
 
     printf("Enter phone number: ");
     fgets(buffer, sizeof(buffer), stdin);
@@ -99,7 +107,7 @@ doctor_t *ask_doctor_details() {
         fgets(buffer, sizeof(buffer), stdin);
         buffer[strcspn(buffer, "\n")] = '\0';
     }
-    d->phone = strdup(buffer);
+    d->phone = strdup_c90(buffer);
 
     printf("Enter email: ");
     fgets(buffer, sizeof(buffer), stdin);
@@ -109,17 +117,17 @@ doctor_t *ask_doctor_details() {
         fgets(buffer, sizeof(buffer), stdin);
         buffer[strcspn(buffer, "\n")] = '\0';
     }
-    d->email = strdup(buffer);
+    d->email = strdup_c90(buffer);
 
     printf("Enter password: ");
     fgets(buffer, sizeof(buffer), stdin);
     buffer[strcspn(buffer, "\n")] = '\0';
-    d->password = strdup(buffer);
+    d->password = strdup_c90(buffer);
 
     printf("Enter specialization: ");
     fgets(buffer, sizeof(buffer), stdin);
     buffer[strcspn(buffer, "\n")] = '\0';
-    d->specialization = strdup(buffer);
+    d->specialization = strdup_c90(buffer);
 
     return d;
 }
@@ -144,40 +152,4 @@ int is_valid_phone_number(char *p) {
         if (p[i] < '0' || p[i] > '9') return 0;
     }
     return i >= 8;
-}
-
-void use() {
-    patient_t *patients[100];
-    doctor_t *doctors[100];
-    int num_patients = 0;
-    int num_doctors = 0;
-    int choice;
-
-    do {
-        printf("\n--- Hospital App Menu ---\n");
-        printf("1. Add Patient\n");
-        printf("2. Display Patients\n");
-        printf("3. Add Doctor\n");
-        printf("4. Display Doctors\n");
-        printf("5. Exit\n");
-        printf("Enter choice: ");
-        scanf("%d", &choice);
-        getchar();
-
-        if (choice == 1) {
-            if (num_patients < 100) {
-                patients[num_patients] = ask_patient_details();
-                num_patients++;
-            }
-        } else if (choice == 2) {
-            display_patients(patients, num_patients);
-        } else if (choice == 3) {
-            if (num_doctors < 100) {
-                doctors[num_doctors] = ask_doctor_details();
-                num_doctors++;
-            }
-        } else if (choice == 4) {
-            display_doctors(doctors, num_doctors);
-        }
-    } while (choice != 5);
 }
