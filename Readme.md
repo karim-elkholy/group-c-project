@@ -1,11 +1,4 @@
 
-# Project syntax 
-
-Tutor and Anna from Ed allow C99 to be used in this project.
-
-Comments can be like this.
-
-> // This is a comment
 
 # Git How To Use
 ## Getting started
@@ -81,3 +74,10 @@ Step 1. Compile your program into an executable with debug flags turned on
 Step 2. Run valgrind --show-leak-kinds=all --leak-check=full ./test.o 
 > valgrind --show-leak-kinds=all --leak-check=full ./main.o 
 
+# Project syntax 
+
+Tutor and Anna from Ed allow C99 to be used in this project.
+
+Comments can be like this.
+
+> // This is a comment

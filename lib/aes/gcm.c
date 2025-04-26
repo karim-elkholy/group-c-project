@@ -7,21 +7,8 @@
 #include "aes/core/aes.h"
 #include "aes/core/aes_keyschedule.h"
 #include "aes/core/aes_operations.h"
+#include "aes/gcm.h"
 
-/* Holds data encrypted with AES-GCM */
-struct aes_gcm_encrypted_data {
-    unsigned char *ciphertext;
-    int ciphertext_length;
-
-    /* The nonce used for the encryption */
-    unsigned char nonce[12];
-
-    /* The tag 
-    * 12 bytes is used to follow the recommended standard.
-    */
-    unsigned char tag[16];
-};
-typedef struct aes_gcm_encrypted_data aes_gcm_encrypted_data_t;
 
 /* Context needed during GCM encryption */
 struct aes_gcm_context

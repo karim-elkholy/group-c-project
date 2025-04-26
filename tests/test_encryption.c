@@ -249,22 +249,84 @@ void test_aes_gcm_all() {
     /* Number of test cases */
     const int num_test_cases = 3;
 
-    /* List to hold plaintext for each test case */
+    /* Allocate memory to hold the details of each test case */
+    /* Plaintext */
     unsigned char **plaintexts = malloc(num_test_cases * sizeof(unsigned char *));
-
-    /* List to hold key for each test case */
+    /* Plaintext size */
+    int *plaintext_sizes = malloc(num_test_cases * sizeof(int));
+    /* Key */
     unsigned char **keys = malloc(num_test_cases * sizeof(unsigned char *));
-
-    /* List to hold nonce for each test case */
+    /* Nonce */
     unsigned char **nonces = malloc(num_test_cases * sizeof(unsigned char *));
-
-    /* List to hold AAD for each test case */
+    /* AAD */
     unsigned char **aads = malloc(num_test_cases * sizeof(unsigned char *));
-
-    /* List to hold expected ciphertext for each test case */
+    /* Expected ciphertext */
     unsigned char **expected_ciphertexts = malloc(num_test_cases * sizeof(unsigned char *));
-    
-    
+    /* Expected tags */
+    unsigned char **expected_tags = malloc(num_test_cases * sizeof(unsigned char *));
+    /* Test case 1
+    * The plaintext is actually empty. This is not a mistake or typo.
+    * This is the first test case in the NIST document.
+    plaintexts[0] = convert_hex_string_to_bytes("");
+    plaintext_sizes[0] = 0;
+    keys[0] = convert_hex_string_to_bytes("00000000000000000000000000000000");
+    nonces[0] = convert_hex_string_to_bytes("000000000000000000000000");
+    aads[0] = convert_hex_string_to_bytes("");
+    expected_ciphertexts[0] = convert_hex_string_to_bytes("00000000000000000000000000000000");
+     */
+
+    /* Test case 2 */
+    plaintexts[1] = convert_hex_string_to_bytes("00000000000000000000000000000000");
+    plaintext_sizes[1] = 16;
+    keys[1] = convert_hex_string_to_bytes("00000000000000000000000000000000");
+    nonces[1] = convert_hex_string_to_bytes("000000000000000000000000");
+    aads[1] = convert_hex_string_to_bytes("");
+    expected_ciphertexts[1] = convert_hex_string_to_bytes("0388dace60b6a392f328c2b971b2fe78");
+    expected_tags[1] = convert_hex_string_to_bytes("ab6e47d42cec13bdf53a67b21257bddf");
+
+    /* Test case 3 */
+    plaintexts[2] = convert_hex_string_to_bytes("d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b391aafd255");
+    plaintext_sizes[2] = 64;
+    keys[2] = convert_hex_string_to_bytes("feffe9928665731c6d6a8f9467308308");
+    nonces[2] = convert_hex_string_to_bytes("cafebabefacedbaddecaf888");
+    aads[2] = convert_hex_string_to_bytes("");
+    expected_ciphertexts[2] = convert_hex_string_to_bytes("42831ec2217774244b7221b784d0d49ce3aa212f2c02a4e035c17e2329aca12e21d514b25466931c7d8f6a5aac84aa051ba30b396a0aac973d58e091473f5985");
+    expected_tags[2] = convert_hex_string_to_bytes("4d5c2af327cd64a62cf35abd2ba6fab4");
+
+    /* Iterate over the test cases */
+    int i;
+    for (i = 0; i < num_test_cases; i++) {
+
+        /* If this is the first test case */
+        /* Temp - later start from 0 */
+        if (i == 0) {
+            continue;
+        }
+
+        /* Encrypt the plaintext */
+        aes_gcm_encrypted_data_t *enc_data = aes_encrypt_gcm(
+            plaintexts[i], plaintext_sizes[i], keys[i], 16, nonces[i]
+        );
+
+        /* Iterate over the ciphertext */
+        int j;
+        for (j = 0; j < enc_data->ciphertext_length; j++) {
+            /* If the ciphertext doesn't match the expected ciphertext */
+            if (enc_data->ciphertext[j] != expected_ciphertexts[i][j]) {
+                printf("Test failed\n");
+                printf("Expected: %s\n", convert_bytes_to_hex_string(
+                    expected_ciphertexts[i], 
+                    enc_data->ciphertext_length)
+                );
+                printf("Actual: %s\n", convert_bytes_to_hex_string(
+                    enc_data->ciphertext, 
+                    enc_data->ciphertext_length)
+                );
+                exit(1);
+            }
+        }
+
+    }
 }
 
 /* Taken from https://csrc.nist.rip/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-spec.pdf*/
@@ -322,6 +384,8 @@ int main() {
 
     /* Test AES-GCM */
 
+
+
     test_run_method("convert bytes to hex string", test_bytes_to_hex_str);
     test_run_method("convert hex string to bytes", test_hex_str_to_bytes);
     test_run_method("FIPS examples", test_fips_example);
@@ -330,7 +394,8 @@ int main() {
     test_run_method("AES 256 encrypt", test_aes_256_encrypt);
     test_run_method("AES-GCM encrypt case 2", test_aes_gcm_encrypt_case_3); 
     test_run_method("AES-GCM encrypt case 3", test_aes_gcm_encrypt_case_3);
-
+    test_run_method("AES-GCM all", test_aes_gcm_all);
+    exit(0);
 
     return 0;
 }

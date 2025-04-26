@@ -27,6 +27,8 @@ struct doctor {
     char *password;
     char *specialization;
 };
+void read_string(const char *prompt, char *input, int input_size);
+char read_choice(const char *prompt);
 
 typedef struct doctor doctor_t;
 

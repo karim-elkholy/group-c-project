@@ -2,13 +2,16 @@ cmake_minimum_required(VERSION 3.10)
 project(AES C)
 
 # Enable C99
-set(CMAKE_C_STANDARD 99)
+# set(CMAKE_C_STANDARD 99)
 
 # Compiler flags applied to ALL targets
 # Taken from lab1
 # C Code must confirm to 1989 C standard
 # Tutor and Anna from Ed allow C99
 # add_compile_options(-ansi)
+# For development we can use gnu89
+# This allows // comments 
+add_compile_options(-std=gnu89)
 # Treat warnings as errors
 add_compile_options(-Wall -Werror)
 # Adhere strictly to the above specified C standard
@@ -20,6 +23,8 @@ file(GLOB_RECURSE SOURCES
     "include/*.h"
 )
 
+# Temp - exclude 'user' directory
+list(FILTER SOURCES EXCLUDE REGEX "user/*")
 
 # Enables debug mode 
 function(enable_debug target_name)

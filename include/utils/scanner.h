@@ -1,0 +1,29 @@
+#ifndef UTILS_SCANNER_H
+#define UTILS_SCANNER_H
+
+#include <stdio.h>
+
+/*******************************************************************************
+ * Used to read a string from the user.
+ * 
+ * inputs:
+ * - prompt - The prompt to display to the user
+ * - input - String to store the user's input
+ * - input_size - Size of the string
+ * outputs:
+ * - The user's input
+ ******************************************************************************/
+void readString(const char *prompt, char *input, int input_size);
+
+/*******************************************************************************
+ * Used to read input from the user. Enforces a single character input.
+ *
+ * inputs:
+ * - none
+ * outputs:
+ * - The user's choice
+ ******************************************************************************/
+char read_choice(const char *prompt);
+
+#endif
+

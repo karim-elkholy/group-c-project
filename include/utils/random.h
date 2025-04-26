@@ -3,6 +3,5 @@
 
 unsigned char *random_bytes(int n);
 
-
 #endif
 

@@ -12,6 +12,6 @@
  * Author: Keiron Lee
  ******************************************************************************/
 
-void use();
+void use(const char *hospital_name);
 
 #endif
