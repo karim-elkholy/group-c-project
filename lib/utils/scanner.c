@@ -1,5 +1,8 @@
 
 #include "utils/scanner.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /*******************************************************************************
  * Used to read a string from the user.

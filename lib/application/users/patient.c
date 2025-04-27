@@ -1,5 +1,8 @@
 #include <stdio.h>
-#include <application/users.h>
+#include <string.h>
+
+#include "application/users/patients.h"
+#include "application/users/records.h"
 /*******************************************************************************
  * Prints the patient menu.
  * 
@@ -17,6 +20,7 @@ void print_patient_menu() {
 }
 
 
+
 /*******************************************************************************
  * Finds a patient in the hospital records.
  * 
@@ -27,19 +31,19 @@ void print_patient_menu() {
  * outputs:
  * - The user if found, otherwise NULL
  ******************************************************************************/
-user_record_t *find_patient(user_record_t *records, char *user_id) {
+patient_details_t *find_patient(record_t *records, char *id) {
 
-    /* Iterate through the doctors */
+    /* Iterate through the patients */
     int i;
-    for (i = 0; i < records->num_doctors; i++) {
+    for (i = 0; i < records->num_patients; i++) {
 
         /* If this user's ID matches the given ID */
-        if (strcmp(records->doctors[i].id, user_id) == 0) {
-            return &records->doctors[i];
+        if (strcmp(records->patients[i].user.id, id) == 0) {
+            return &records->patients[i];
         }
     }
 
-    /* If no doctor is found, return NULL */
+    /* If no patient is found, return NULL */
     return NULL;
 }
 
@@ -51,7 +55,7 @@ user_record_t *find_patient(user_record_t *records, char *user_id) {
  * outputs:
  * - none
  *******************************************************************************/
-void patient_use() {
+void patient_use(patient_details_t *patient) {
 
     /* Login */
 

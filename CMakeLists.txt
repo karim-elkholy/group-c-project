@@ -23,9 +23,6 @@ file(GLOB_RECURSE SOURCES
     "include/*.h"
 )
 
-# Temp - exclude 'user' directory
-list(FILTER SOURCES EXCLUDE REGEX "user/*")
-
 # Enables debug mode 
 function(enable_debug target_name)
     target_compile_options(${target_name} PRIVATE -g)

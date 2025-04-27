@@ -1,5 +1,6 @@
 
 #include "utils/bitops.h"
+
 /*******************************************************************************
  * XORs two array of bytes.
  * byte = unsigned char
