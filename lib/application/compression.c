@@ -48,7 +48,8 @@ void decompress_file(const char *input, const char *output) {
     char ch;
     int count;
     while (fscanf(fin, "%c%d", &ch, &count) == 2) {
-        for (int i = 0; i < count; i++) {
+        int i;
+        for (i = 0; i < count; i++) {
             fputc(ch, fout);
         }
     }
