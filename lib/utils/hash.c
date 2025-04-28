@@ -1,4 +1,5 @@
 #include "utils/hash.h"
+#include <string.h>
 /*******************************************************************************
  * Hashes the given text using XOR.
  * 
