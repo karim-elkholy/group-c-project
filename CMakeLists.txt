@@ -19,12 +19,12 @@ add_compile_options(-Wall -Werror)
 
 # Use all library files 
 file(GLOB_RECURSE SOURCES
-    "lib/*.c"
-    "include/*.h"
+    "lib/**/*.c"
+    "include/**/*.h"
 )
 
-# Temp - exclude 'user' directory
-list(FILTER SOURCES EXCLUDE REGEX "user/*")
+# Temp - show all sources
+message(STATUS "Sources: ${SOURCES}")
 
 # Enables debug mode 
 function(enable_debug target_name)
@@ -47,14 +47,17 @@ create_lib(lib_code_debug)
 # Executables
 add_executable(aes_main "main.c") #Main executable
 add_executable(aes_encryption_debug "tests/test_encryption.c") #Test encryption executable
+add_executable(aes_compression_debug "tests/test_compression.c") #Test compression executable
 
-# Enable debug mode for the debug versions of test & the library 
+# Enable debug mode for the debug versions for tests & the debug library
 enable_debug(aes_encryption_debug)
+enable_debug(aes_compression_debug)
 enable_debug(lib_code_debug)
 
 # Link custom library to the release & debug targets
 target_link_libraries(aes_main lib_code_release)
 target_link_libraries(aes_encryption_debug lib_code_release)
+target_link_libraries(aes_compression_debug lib_code_release)
 
 # Link math library to all targets
 link_libraries(m)

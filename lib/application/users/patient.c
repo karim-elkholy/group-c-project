@@ -28,15 +28,15 @@ void print_patient_menu() {
  * outputs:
  * - The user if found, otherwise NULL
  ******************************************************************************/
-user_record_t *find_patient(user_record_t *records, char *user_id) {
+patient_details_t *find_patient(patient_details_t **records, int patient_count, char *user_id) {
 
-    /* Iterate through the doctors */
+    /* Iterate through the patients */
     int i;
-    for (i = 0; i < records->num_doctors; i++) {
+    for (i = 0; i < patient_count; i++) {
 
         /* If this user's ID matches the given ID */
-        if (strcmp(records->doctors[i].id, user_id) == 0) {
-            return &records->doctors[i];
+        if (strcmp(records[i]->id, user_id) == 0) {
+            return records[i];
         }
     }
 

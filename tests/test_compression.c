@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../include/utils/compression.h"
+#include "../lib/application/compression.c"
 
 int main() {
     const char *input = "test_input.txt";

@@ -11,7 +11,7 @@
  * outputs:
  * - The user's input
  ******************************************************************************/
-void readString(const char *prompt, char *input, int input_size) {
+void read_string(const char *prompt, char *input, int input_size) {
 
     /* Print the prompt to the user */
     printf("%s", prompt);
@@ -42,7 +42,7 @@ char read_choice(const char *prompt)
 	char choice[256];
 
     /* Capture the user's input */
-    readString(prompt, choice, sizeof(choice));
+    read_string(prompt, choice, sizeof(choice));
 
 	/* If more than a single character is entered */
 	if (strlen(choice) > 1)

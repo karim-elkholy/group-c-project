@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "compression.h"
+#include "utils/compression.h"
 
 /*******************************************************************************
  * Compresses the content of a file using Run-Length Encoding (RLE).
@@ -81,7 +81,8 @@ void decompress_file(const char *input, const char *output) {
     int count;
     // Read each character and repeat count
     while (fscanf(fin, "%c%d", &ch, &count) == 2) {
-        for (int i = 0; i < count; i++) {
+        int i;
+        for (i = 0; i < count; i++) {
             fputc(ch, fout);
         }
     }

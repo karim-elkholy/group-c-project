@@ -31,15 +31,15 @@ void print_doctor_menu()
  * outputs:
  * - The user if found, otherwise NULL
  ******************************************************************************/
-user_record_t *find_doctor(user_record_t *records, char *user_id) {
+doctor_details_t *find_doctor(doctor_details_t *records, int doctor_count, char *user_id) {
 
     /* Iterate through the doctors */
     int i;
-    for (i = 0; i < records->num_doctors; i++) {
+    for (i = 0; i < doctor_count; i++) {
 
         /* If this user's ID matches the given ID */
-        if (strcmp(records->doctors[i].id, user_id) == 0) {
-            return &records->doctors[i];
+        if (strcmp(records[i].id, user_id) == 0) {
+            return &records[i];
         }
     }
 
@@ -62,5 +62,9 @@ void doctor_use() {
 
 
 void create_doctor() {
+
+}
+
+void doctor_menu(doctor_details_t *doctor) {
 
 }

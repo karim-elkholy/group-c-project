@@ -1,8 +1,11 @@
- #include <stdio.h>
- #include <stdlib.h>
- #include "input.h"
- #include "user/core.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "user/core.h"
 #include "application/users.h"
+#include "utils/hash.h"
+#include "utils/scanner.h"
 
 user_record_t *load_database(const char *hospital_name, int *num_users);
 void save_database(const char *hospital_name, user_record_t *records);
@@ -15,7 +18,7 @@ void save_database(const char *hospital_name, user_record_t *records);
  * outputs:
  * - 1 if the password is correct, otherwise 0
  ******************************************************************************/
-int verify_user_password(const char *expected_password) {
+int verify_user_password(unsigned int expected_password) {
 
     /* Counter for keeping track of the number of login attempts */
     int counter = 3;
@@ -27,7 +30,7 @@ int verify_user_password(const char *expected_password) {
         read_string("Enter your password: ", user_password, sizeof(user_password));
 
         /* Consider the user verified if the password is correct */
-        if (strcmp(expected_password, hash_text(user_password)) == 0) {
+        if (expected_password == hash_text(user_password)) {
             return 1;
         }
 
@@ -41,7 +44,21 @@ int verify_user_password(const char *expected_password) {
 }
 
 /*******************************************************************************
- * Handles access to the 'doctor' menu.
+ * Handles access to the 'patient' menu.
+ * Logs in a patient or provides signup option.
+ * 
+ * inputs:
+ * - users - The database
+ * - num_users - The number of users in the database
+ ******************************************************************************/
+void use_patient_menu(user_record_t *records) {
+
+    /* TODO - Implement the patient menu */
+}
+
+
+/*******************************************************************************
+ * Handles access to the 'patient' menu.
  * Ensures user is authenticated before providing access. 
  * 
  * inputs:
@@ -57,7 +74,7 @@ void use_doctor_menu(user_record_t *records) {
     read_string("Enter your ID: ", user_id, sizeof(user_id));
 
     /* Find the user */
-    doctor_details_t *doctor = find_doctor(records, user_id);
+    doctor_details_t *doctor = find_doctor(records->doctors, records->num_doctors, user_id);
 
     /* If the user is not found, print an error message */
     if (doctor == NULL) {
@@ -72,6 +89,22 @@ void use_doctor_menu(user_record_t *records) {
 
     /* Call the doctor menu */
     doctor_menu(doctor);
+}
+
+
+/*******************************************************************************
+ * Print the available choices.
+ *
+ * inputs:
+ * - none
+ * outputs:
+ * - none
+ ******************************************************************************/
+void print_menu() {
+    printf("P. Login as Patient\n");
+    printf("D. Login as Doctor\n");
+    printf("M. Print this menu again\n");
+    printf("X. Exit\n");
 }
 
  /******************************************************************************
@@ -102,10 +135,10 @@ void use(const char *hospital_name)
 		switch (choice)
 		{
             case 'P':
-                patient_use();
+                use_patient_menu(records);
                 break;
             case 'D':
-                doctor_use();
+                use_doctor_menu(records);
                 break;
             case 'M':
                 print_menu();
@@ -122,21 +155,6 @@ void use(const char *hospital_name)
 	/* Once the user has exited the program, free the allocated memory
 	 * Failing to do this will lead to memory leaks */
 	free(records);
-}
-
-/*******************************************************************************
- * Print the available choices.
- *
- * inputs:
- * - none
- * outputs:
- * - none
- ******************************************************************************/
-void print_menu() {
-    printf("P. Login as Patient\n");
-    printf("D. Login as Doctor\n");
-    printf("M. Print this menu again\n");
-    printf("X. Exit\n");
 }
 
 /*******************************************************************************
@@ -196,7 +214,7 @@ user_record_t *load_database(const char *hospital_name, int *num_users) {
         fscanf(db, "%s", records->doctors[i].name);
         fscanf(db, "%s", records->doctors[i].email);
         fscanf(db, "%s", records->doctors[i].phone);
-        fscanf(db, "%s", records->doctors[i].password);
+        fscanf(db, "%u", &records->doctors[i].password);
         fscanf(db, "%s", records->doctors[i].specialization);
         fscanf(db, "%s", records->doctors[i].license_number);
     }
@@ -260,7 +278,7 @@ void save_database(const char *hospital_name, user_record_t *records) {
         fprintf(db, "%s\n", records->doctors[i].name);
         fprintf(db, "%s\n", records->doctors[i].email);
         fprintf(db, "%s\n", records->doctors[i].phone);
-        fprintf(db, "%s\n", records->doctors[i].password);
+        fprintf(db, "%u\n", records->doctors[i].password);
         fprintf(db, "%s\n", records->doctors[i].specialization);
         fprintf(db, "%s\n", records->doctors[i].license_number);
     }
