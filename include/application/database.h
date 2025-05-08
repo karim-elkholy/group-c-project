@@ -7,6 +7,10 @@
 
 /* Holds the hospital records */
 struct hospital_record {
+
+    /* Hospital name */
+    char hospital_name[256];
+
     /* Patients */
     patient_details_t *patients;
     /* Doctors */
@@ -16,12 +20,6 @@ struct hospital_record {
     int num_patients;
     /* Number of doctors */
     int num_doctors;
-
-
-    /* Number of available slots for patients */
-    int num_patients_available;
-    /* Number of available slots for doctors */
-    int num_doctors_available;
 };
 
 /*******************************************************************************
@@ -33,7 +31,7 @@ struct hospital_record {
  * outputs:
  * - The database.
  ******************************************************************************/
-hospital_record_t *load_database(const char *hospital_name, int *num_users);
+hospital_record_t *load_database(const char *hospital_name);
 
 /*******************************************************************************
  * Save the database.
@@ -42,7 +40,7 @@ hospital_record_t *load_database(const char *hospital_name, int *num_users);
  * - hospital_name - The name of the hospital.
  * - records - The database.
  ******************************************************************************/
-void save_database(const char *hospital_name, hospital_record_t *records);
+void save_database(hospital_record_t *records);
 
 /*******************************************************************************
  * Close the database.

@@ -93,7 +93,7 @@ void use_doctor_menu(hospital_record_t *records) {
     
     /* Find the user */
     doctor_details_t *doctor = find_doctor(
-        records->doctors, records->num_doctors, user_id);
+        records, user_id);
 
     /* If the user is not found, print an error message */
     if (doctor == NULL) {
@@ -105,7 +105,7 @@ void use_doctor_menu(hospital_record_t *records) {
     /* Login to the doctor menu if the user provides the correct password */
     if (verify_user_password(doctor->password) == 1) {
         /* Call the doctor menu */
-        doctor_menu(doctor);
+        /* doctor_menu(doctor); */
     }
 }
 
@@ -125,6 +125,29 @@ void print_menu() {
     printf("X. Exit\n");
 }
 
+/*******************************************************************************
+ * Seed data function.
+ * 
+ * inputs:
+ * - records - The hospital records
+ * outputs:
+ * - none
+ ******************************************************************************/
+void seed_data(hospital_record_t *records) {
+    /* Add a doctor to the hospital records */
+    doctor_details_t *doctor = (doctor_details_t *)calloc(
+        1, sizeof(doctor_details_t)
+    );
+    strcpy(doctor->username, "1");
+    strcpy(doctor->name, "John Doe");
+    strcpy(doctor->email, "john.doe@example.com");
+    strcpy(doctor->phone, "1234567890");
+    doctor->password = hash_string("1");
+    strcpy(doctor->specialization, "Cardiology");
+    strcpy(doctor->license_number, "1234567890");
+    doctor_signup_silent(records, doctor);
+}
+
  /******************************************************************************
  * Entry point for the app.
  *
@@ -139,8 +162,7 @@ void use(const char *hospital_name)
     printf("Welcome to the %s hospital management system\n", hospital_name);
 
     /* Load the database */
-    int num_users;
-    hospital_record_t *records = load_database(hospital_name, &num_users);
+    hospital_record_t *records = load_database(hospital_name);
 
     // Show the available choices
     print_menu();
@@ -165,6 +187,10 @@ void use(const char *hospital_name)
                 printf("Invalid choice\n");
                 break;
         }
+
+        /* Save the database */
+        save_database(records);
+
 	}
 
     /* Print a goodbye message */

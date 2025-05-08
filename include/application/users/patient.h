@@ -1,11 +1,12 @@
 #ifndef APPLICATION_USERS_PATIENT_H
 #define APPLICATION_USERS_PATIENT_H
 
+typedef struct hospital_record hospital_record_t;
 
 struct patient_details {
 
-    /* ID */
-    char id[256];
+    /* Username */
+    char username[256];
     
     /* Name */
     char name[256];
@@ -17,7 +18,7 @@ struct patient_details {
     char phone[256];
 
     /* Hashed password */
-    char password[256];
+    unsigned int password;
 
     /* Blood type */
     char blood_type[3];
@@ -36,18 +37,48 @@ struct patient_details {
 
     /* Extra notes about the patient */
     char notes[256];
+
+    /* Next patient */
+    /* Needed for linked list */
+    struct patient_details *next;
 };
 
 typedef struct patient_details patient_details_t;
 
-/* Adds a new patient by writing to the patient array.*/
-void addPatient(patient_details_t *patients, int *num_patients);
+/*******************************************************************************
+ * Silently adds a new patient to the hospital records.
+ * 
+ * inputs:
+ * - records - The hospital records
+ * - patient - The patient to add
+ * outputs:
+ * - none
+ ******************************************************************************/
+void patient_signup_silent(
+    hospital_record_t *records, 
+    patient_details_t *patient
+);
 
-/* Frees memory allocated for a single patient.*/
-void delete_patient(patient_details_t *patient);
+/*******************************************************************************
+ * Adds a new patient to the hospital records.
+ * 
+ * inputs:
+ * - records - The hospital records
+ * outputs:
+ * - none
+ ******************************************************************************/
+void patient_signup(hospital_record_t *records);
 
-/* Displays all patients in the array (for viewing purposes).*/
-void display_patients(patient_details_t *patients[], int num_patients);
+/*******************************************************************************
+ * Finds a patient by their ID.
+ * 
+ * inputs:
+ * - records - The hospital records
+ * - user_id - The ID of the patient to find
+ * outputs:
+ * - The patient if found, otherwise NULL
+ ******************************************************************************/
+patient_details_t *find_patient(hospital_record_t *records, char *user_id);
 
 #endif
 
