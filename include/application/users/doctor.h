@@ -1,6 +1,7 @@
 #ifndef APPLICATION_USERS_DOCTOR_H
 #define APPLICATION_USERS_DOCTOR_H
 
+typedef struct hospital_record hospital_record_t;
 
 struct doctor_details {
     /* ID */

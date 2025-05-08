@@ -3,8 +3,10 @@
 #include <string.h>
 
 #include "application/database.h"
+#include "application/users/doctor.h"
 #include "utils/hash.h"
 #include "utils/scanner.h"
+
 
 /*******************************************************************************
  * Verifies the user's password.
@@ -23,10 +25,11 @@ int verify_user_password(unsigned int expected_password) {
 
         /* Store the user's password */
         char user_password[256];
-        read_string("Enter your password: ", user_password, sizeof(user_password));
+        read_string("Password: ", 
+            user_password, sizeof(user_password));
 
         /* Consider the user verified if the password is correct */
-        if (expected_password == hash_text(user_password)) {
+        if (expected_password == hash_string(user_password)) {
             return 1;
         }
 
@@ -67,36 +70,43 @@ void use_doctor_menu(hospital_record_t *records) {
 
     /* If no doctors exist */
     if (records->num_doctors == 0) {
+
+        /* Explain why the user needs to sign up as a doctor */
+        printf("First-time Setup: Doctor Registration Required\n");
+        printf("Please signup as a doctor to initialize the system.\n");
+
         /* Sign up as a doctor */
         doctor_signup(records);
+
+        /* Redirecting to login menu message*/
+        printf("Redirecting to login menu\n");
     }
 
-    /* Ask the user to authenticate */
-    printf("Please login to continue\n");
+    /* Stylish login message*/
+    printf("--------------------------------\n");
+    printf("Doctor Login \n");
+    printf("--------------------------------\n");
 
     /* Store the user's ID */
     char user_id[256];
-    read_string("Enter your ID: ", user_id, sizeof(user_id));
+    read_string("Username: ", user_id, sizeof(user_id));
     
     /* Find the user */
-    doctor_details_t *doctor = find_doctor(records->doctors, records->num_doctors, user_id);
+    doctor_details_t *doctor = find_doctor(
+        records->doctors, records->num_doctors, user_id);
 
     /* If the user is not found, print an error message */
     if (doctor == NULL) {
         printf("No doctor with ID %s found\n", user_id);
         return;
+
     }
 
-    exit(0);
-
-    /* Exit early if the user failed to provide the correct password */
-    if (verify_user_password(doctor->password) == 0) {
-        return;
+    /* Login to the doctor menu if the user provides the correct password */
+    if (verify_user_password(doctor->password) == 1) {
+        /* Call the doctor menu */
+        doctor_menu(doctor);
     }
-
-
-    /* Call the doctor menu */
-    doctor_menu(doctor);
 }
 
 

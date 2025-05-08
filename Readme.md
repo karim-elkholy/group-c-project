@@ -13,6 +13,14 @@
 # How to build 
 > cmake --build ./build
 
+# How to run 
+
+Windows
+> ./build/main.exe
+
+Linux
+> ./build/main
+
 ## Test executables
 
 ### Compression

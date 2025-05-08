@@ -2,6 +2,9 @@
 #include <string.h>
 
 #include "application/database.h"
+#include "application/users/doctor.h"
+#include "utils/scanner.h"
+#include "utils/hash.h"
 
 /*******************************************************************************
  * Prints the doctor menu.
@@ -32,6 +35,9 @@ void print_doctor_menu()
  *******************************************************************************/
 void doctor_signup(hospital_record_t *records) {
 
+    printf("--------------------------------\n");
+    printf("Doctor Signup \n");
+    printf("--------------------------------\n");
 
     /* Ask the user for their details */
     char username[256];
@@ -61,7 +67,7 @@ void doctor_signup(hospital_record_t *records) {
     strcpy(doctor.name, name);
     strcpy(doctor.email, email);
     strcpy(doctor.phone, phone);
-    strcpy(doctor.password, password);
+    doctor.password = hash_string(password);
     strcpy(doctor.specialization, specialization);
     strcpy(doctor.license_number, license_number);
 

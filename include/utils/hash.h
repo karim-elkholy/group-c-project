@@ -2,14 +2,14 @@
 #define UTILS_HASH_H
 
 /*******************************************************************************
- * Hashes the given text using XOR.
+ * Hashes the given string using XOR.
  * 
  * inputs:
- * - text - The text to hash
+ * - string - The string to hash
  * outputs:
- * - The hashed text
+ * - The hashed string
  ******************************************************************************/
-unsigned int hash_text(const char *text);
+unsigned int hash_string(const char *string);
 
 #endif
 

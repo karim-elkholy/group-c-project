@@ -1,6 +1,7 @@
 #ifndef APPLICATION_DATABASE_H
 #define APPLICATION_DATABASE_H
 
+
 #include "application/users/patient.h"
 #include "application/users/doctor.h"
 
@@ -22,8 +23,6 @@ struct hospital_record {
     /* Number of available slots for doctors */
     int num_doctors_available;
 };
-
-typedef struct hospital_record hospital_record_t;
 
 /*******************************************************************************
  * Load the database.

@@ -42,19 +42,19 @@ create_lib(lib_code_release)
 create_lib(lib_code_debug)
 
 # Executables
-add_executable(aes_main "main.c") #Main executable
-add_executable(aes_encryption_debug "tests/test_encryption.c") #Test encryption executable
-add_executable(aes_compression_debug "tests/test_compression.c") #Test compression executable
+add_executable(main "main.c") #Main executable
+add_executable(encryption_test "tests/test_encryption.c") #Test encryption executable
+add_executable(compression_test "tests/test_compression.c") #Test compression executable
 
 # Enable debug mode for the debug versions for tests & the debug library
-enable_debug(aes_encryption_debug)
-enable_debug(aes_compression_debug)
+enable_debug(encryption_test)
+enable_debug(compression_test)
 enable_debug(lib_code_debug)
 
 # Link custom library to the release & debug targets
-target_link_libraries(aes_main lib_code_release)
-target_link_libraries(aes_encryption_debug lib_code_release)
-target_link_libraries(aes_compression_debug lib_code_release)
+target_link_libraries(main lib_code_release)
+target_link_libraries(encryption_test lib_code_release)
+target_link_libraries(compression_test lib_code_release)
 
 # Link math library to all targets
 link_libraries(m)

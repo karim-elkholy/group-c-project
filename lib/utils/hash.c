@@ -1,21 +1,21 @@
 #include "utils/hash.h"
 #include <string.h>
 /*******************************************************************************
- * Hashes the given text using XOR.
+ * Hashes the given string using XOR.
  * 
  * inputs:
- * - text - The text to hash
+ * - string - The string to hash
  * outputs:
- * - The hashed text
+ * - The hashed string
  ******************************************************************************/
-unsigned int hash_text(const char *text) {
-    /* Hash the text */
+unsigned int hash_string(const char *string) {
+    /* Hash the string */
     unsigned int hash = 0;
 
     /* XOR each character with a key */
 	int i;
-    for (i = 0; i < strlen(text); i++) {
-        hash ^= text[i];
+    for (i = 0; i < strlen(string); i++) {
+        hash ^= string[i];
     }
     return hash;
 }

@@ -1,7 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "application/database.h"
-#include <stdlib.h>
 
 /*******************************************************************************
  * Initialize the database.
