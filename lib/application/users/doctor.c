@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
-#include <application/users.h>
+
+#include "application/database.h"
 
 /*******************************************************************************
  * Prints the doctor menu.
@@ -19,6 +20,57 @@ void print_doctor_menu()
 		   "4. Delete a patient\n"
 		   "5. Add a new doctor\n"
 		   "6. Exit\n");
+}
+
+/*******************************************************************************
+ * Adds a new doctor to the hospital records.
+ * 
+ * inputs:
+ * - records - The hospital records
+ * outputs:
+ * - none
+ *******************************************************************************/
+void doctor_signup(hospital_record_t *records) {
+
+
+    /* Ask the user for their details */
+    char username[256];
+    read_string("Enter your username: ", username, sizeof(username));
+    /* Name */
+    char name[256];
+    read_string("Enter your name: ", name, sizeof(name));
+    /* Email */
+    char email[256];
+    read_string("Enter your email: ", email, sizeof(email));
+    /* Phone */
+    char phone[256];
+    read_string("Enter your phone: ", phone, sizeof(phone));
+    /* Password */
+    char password[256];
+    read_string("Enter your password: ", password, sizeof(password));
+    /* Specialization */
+    char specialization[256];
+    read_string("Enter your specialization: ", specialization, sizeof(specialization));
+    /* License number */
+    char license_number[256];
+    read_string("Enter your license number: ", license_number, sizeof(license_number));
+
+    /* Create a new doctor */
+    doctor_details_t doctor;
+    strcpy(doctor.id, username);
+    strcpy(doctor.name, name);
+    strcpy(doctor.email, email);
+    strcpy(doctor.phone, phone);
+    strcpy(doctor.password, password);
+    strcpy(doctor.specialization, specialization);
+    strcpy(doctor.license_number, license_number);
+
+    /* Add the doctor to the hospital records */
+    records->doctors[records->num_doctors] = doctor;
+    records->num_doctors += 1;
+
+    /* Print a success message if signup is successful */
+    printf("Signup successful\n");
 }
 
 /*******************************************************************************

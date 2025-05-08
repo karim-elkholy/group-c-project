@@ -2,13 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "user/core.h"
-#include "application/users.h"
+#include "application/database.h"
 #include "utils/hash.h"
 #include "utils/scanner.h"
-
-user_record_t *load_database(const char *hospital_name, int *num_users);
-void save_database(const char *hospital_name, user_record_t *records);
 
 /*******************************************************************************
  * Verifies the user's password.
@@ -51,7 +47,7 @@ int verify_user_password(unsigned int expected_password) {
  * - users - The database
  * - num_users - The number of users in the database
  ******************************************************************************/
-void use_patient_menu(user_record_t *records) {
+void use_patient_menu(hospital_record_t *records) {
 
     /* TODO - Implement the patient menu */
 }
@@ -67,12 +63,21 @@ void use_patient_menu(user_record_t *records) {
  * outputs:
  * - none
  ******************************************************************************/
-void use_doctor_menu(user_record_t *records) {
+void use_doctor_menu(hospital_record_t *records) {
+
+    /* If no doctors exist */
+    if (records->num_doctors == 0) {
+        /* Sign up as a doctor */
+        doctor_signup(records);
+    }
+
+    /* Ask the user to authenticate */
+    printf("Please login to continue\n");
 
     /* Store the user's ID */
     char user_id[256];
     read_string("Enter your ID: ", user_id, sizeof(user_id));
-
+    
     /* Find the user */
     doctor_details_t *doctor = find_doctor(records->doctors, records->num_doctors, user_id);
 
@@ -82,10 +87,13 @@ void use_doctor_menu(user_record_t *records) {
         return;
     }
 
+    exit(0);
+
     /* Exit early if the user failed to provide the correct password */
     if (verify_user_password(doctor->password) == 0) {
         return;
     }
+
 
     /* Call the doctor menu */
     doctor_menu(doctor);
@@ -122,14 +130,14 @@ void use(const char *hospital_name)
 
     /* Load the database */
     int num_users;
-    user_record_t *records = load_database(hospital_name, &num_users);
+    hospital_record_t *records = load_database(hospital_name, &num_users);
 
     // Show the available choices
     print_menu();
 
 	/* Get the user's choice */
 	char choice;
-	while ((choice = read_choice("Enter your choice>\n")) != 'X')
+	while ((choice = read_choice("Enter your choice> ")) != 'X')
 	{
 		/* Process the menu choice */
 		switch (choice)
@@ -154,134 +162,6 @@ void use(const char *hospital_name)
 
 	/* Once the user has exited the program, free the allocated memory
 	 * Failing to do this will lead to memory leaks */
-	free(records);
+	close_database(records);
 }
-
-/*******************************************************************************
- * Load the database.
- * 
- * inputs:
- * - hospital_name - The name of the hospital.
- * outputs:
- * - The database.
- ******************************************************************************/
-user_record_t *load_database(const char *hospital_name, int *num_users) {
-
-    /* Allocate list of users */
-    user_record_t *records = (user_record_t *)malloc(sizeof(user_record_t));
-    
-    /* Name of database file */
-    char db_name[256];
-    sprintf(db_name, "%s.db", hospital_name);
-
-    /* Open the database file */
-    FILE *db = fopen(db_name, "r");
-
-    /* If the database file was not opened successfully */
-    if (db == NULL) {
-        /* Assume the database is empty */
-        *num_users = 0;
-        return records;
-    }
-
-    /* TODO - Later decrypt the database */
-
-    /* Set the number of users in the database */
-    fscanf(db, "%d", &records->num_patients);
-
-    /* Read all the patients from the database */
-    int i;
-    for (i = 0; i < records->num_patients; i++) {
-        fscanf(db, "%s", records->patients[i].id);
-        fscanf(db, "%s", records->patients[i].name);
-        fscanf(db, "%s", records->patients[i].email);
-        fscanf(db, "%s", records->patients[i].phone);
-        fscanf(db, "%s", records->patients[i].password);
-
-        fscanf(db, "%s", records->patients[i].blood_type);
-        fscanf(db, "%s", records->patients[i].medical_history);
-        fscanf(db, "%s", records->patients[i].allergies);
-        fscanf(db, "%s", records->patients[i].medications);
-        fscanf(db, "%f", &records->patients[i].weight);
-        fscanf(db, "%f", &records->patients[i].height);
-        fscanf(db, "%s", records->patients[i].notes);
-    }
-
-    /* Read all the doctors from the database */
-    fscanf(db, "%d", &records->num_doctors);
-    for (i = 0; i < records->num_doctors; i++) {
-        fscanf(db, "%s", records->doctors[i].id);
-        fscanf(db, "%s", records->doctors[i].name);
-        fscanf(db, "%s", records->doctors[i].email);
-        fscanf(db, "%s", records->doctors[i].phone);
-        fscanf(db, "%u", &records->doctors[i].password);
-        fscanf(db, "%s", records->doctors[i].specialization);
-        fscanf(db, "%s", records->doctors[i].license_number);
-    }
-
-    /* Return the list of users */
-    return records;
-}
-
-/*******************************************************************************
- * Save the database.
- * 
- * inputs:
- * - hospital_name - The name of the hospital.
- * - records - The hospital records.
- * outputs:
- * - None.
- *******************************************************************************/
-void save_database(const char *hospital_name, user_record_t *records) {
-
-    /* Name of database file */
-    char db_name[256];
-    sprintf(db_name, "%s.db", hospital_name);
-
-    /* Open the database file */
-    FILE *db = fopen(db_name, "w");
-
-    /* Failure to open the database file should cause the program to exit.*/
-    if (db == NULL) {
-        printf("Error: Failed to open database file.\n");
-        exit(1);
-    }
-
-    /* TODO - Later encrypt the database */
-
-    /* Write the number of patients to the database */
-    fprintf(db, "%d\n", records->num_patients);
-
-    /* Write the patients to the database */
-    int i;
-    for (i = 0; i < records->num_patients; i++) {
-        fprintf(db, "%s\n", records->patients[i].id);
-        fprintf(db, "%s\n", records->patients[i].name);
-        fprintf(db, "%s\n", records->patients[i].email);
-        fprintf(db, "%s\n", records->patients[i].phone);
-        fprintf(db, "%s\n", records->patients[i].password);
-        fprintf(db, "%s\n", records->patients[i].blood_type);
-        fprintf(db, "%s\n", records->patients[i].medical_history);
-        fprintf(db, "%s\n", records->patients[i].allergies);
-        fprintf(db, "%s\n", records->patients[i].medications);
-        fprintf(db, "%f\n", records->patients[i].weight);
-        fprintf(db, "%f\n", records->patients[i].height);
-        fprintf(db, "%s\n", records->patients[i].notes);
-    }
-
-    /* Write the number of doctors to the database */
-    fprintf(db, "%d\n", records->num_doctors);
-
-    /* Write the doctors to the database */
-    for (i = 0; i < records->num_doctors; i++) {
-        fprintf(db, "%s\n", records->doctors[i].id);
-        fprintf(db, "%s\n", records->doctors[i].name);
-        fprintf(db, "%s\n", records->doctors[i].email);
-        fprintf(db, "%s\n", records->doctors[i].phone);
-        fprintf(db, "%u\n", records->doctors[i].password);
-        fprintf(db, "%s\n", records->doctors[i].specialization);
-        fprintf(db, "%s\n", records->doctors[i].license_number);
-    }
-}
-
 

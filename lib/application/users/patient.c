@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
-#include <application/users.h>
+
+#include "application/database.h"
+
 /*******************************************************************************
  * Prints the patient menu.
  * 

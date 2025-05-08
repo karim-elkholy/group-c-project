@@ -23,9 +23,6 @@ file(GLOB_RECURSE SOURCES
     "include/**/*.h"
 )
 
-# Temp - show all sources
-message(STATUS "Sources: ${SOURCES}")
-
 # Enables debug mode 
 function(enable_debug target_name)
     target_compile_options(${target_name} PRIVATE -g)

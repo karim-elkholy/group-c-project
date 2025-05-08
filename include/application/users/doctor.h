@@ -27,8 +27,15 @@ struct doctor_details {
 
 typedef struct doctor_details doctor_details_t;
 
-/* Adds a new doctor to the doctor array.*/
-void addDoctor(doctor_details_t *doctors, int *num_doctors);
+/*******************************************************************************
+ * Adds a new doctor to the hospital records.
+ * 
+ * inputs:
+ * - records - The hospital records
+ * outputs:
+ * - none
+ *******************************************************************************/
+void doctor_signup(hospital_record_t *records);
 
 /* Finds a doctor by their ID.*/
 doctor_details_t *find_doctor(doctor_details_t *records, int doctor_count, char *user_id);
