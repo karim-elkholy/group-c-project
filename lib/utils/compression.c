@@ -13,20 +13,20 @@
  * - none
  *******************************************************************************/
 void compress_file(const char *input, const char *output) {
-    FILE *fin = fopen(input, "r");
+    FILE *fin = fopen(input, "rb");
     if (!fin) {
         printf("Error opening input file: %s\n", input);
         return;
     }
 
-    FILE *fout = fopen(output, "w");
+    FILE *fout = fopen(output, "wb");
     if (!fout) {
         printf("Error opening output file: %s\n", output);
         fclose(fin);
         return;
     }
 
-    // Read the first character to begin compression
+    /* Read the first character to begin compression */
     char prev = fgetc(fin);
     if (prev == EOF) {
         fclose(fin);
@@ -36,18 +36,18 @@ void compress_file(const char *input, const char *output) {
 
     int count = 1;
     char curr;
-    // Loop through remaining characters
+    /* Loop through remaining characters */
     while ((curr = fgetc(fin)) != EOF) {
         if (curr == prev) {
             count++;
         } else {
-            // Write the character and its repeat count
+            /* Write the character and its repeat count */
             fprintf(fout, "%c%d", prev, count);
             prev = curr;
             count = 1;
         }
     }
-    // Write the last character and count
+    /* Write the last character and count */
     fprintf(fout, "%c%d", prev, count);
 
     fclose(fin);
@@ -65,13 +65,13 @@ void compress_file(const char *input, const char *output) {
  * - none
  *******************************************************************************/
 void decompress_file(const char *input, const char *output) {
-    FILE *fin = fopen(input, "r");
+    FILE *fin = fopen(input, "rb");
     if (!fin) {
         printf("Error opening input file: %s\n", input);
         return;
     }
 
-    FILE *fout = fopen(output, "w");
+    FILE *fout = fopen(output, "wb");
     if (!fout) {
         printf("Error opening output file: %s\n", output);
         fclose(fin);
@@ -80,7 +80,7 @@ void decompress_file(const char *input, const char *output) {
 
     char ch;
     int count;
-    // Read each character and repeat count
+    /* Read each character and repeat count */
     while (fscanf(fin, "%c%d", &ch, &count) == 2) {
         int i;
         for (i = 0; i < count; i++) {

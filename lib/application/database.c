@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "application/database.h"
+#include "utils/compression.h"
 
 /*******************************************************************************
  * Initialize the database.
@@ -41,12 +43,15 @@ hospital_record_t *database_init(const char *hospital_name) {
  ******************************************************************************/
 hospital_record_t *load_database(const char *hospital_name) {
 
-    // Initialize the database
+    /* Initialize the database */
     hospital_record_t *records = database_init(hospital_name);
-    
+
     /* Name of database file */
     char db_name[256];
     sprintf(db_name, "%s.db", hospital_name);
+
+    /* Decompress the database(if one already exists) */
+    decompress_file("compressed.db", db_name);
 
     /* Open the database file */
     FILE *db = fopen(db_name, "rb");
@@ -108,7 +113,6 @@ hospital_record_t *load_database(const char *hospital_name) {
             doctors_tail = doctors_tail->next;
         }
     }
-
 
     /* -----------------------------------------------------------------------*/
     /* Patients section */
@@ -174,10 +178,12 @@ hospital_record_t *load_database(const char *hospital_name) {
     /* Close the database file */
     fclose(db);
 
+    /* Remove the database file */
+    /* remove(db_name); */
+
     /* Return the list of users */
     return records;
 }
-
 
 /*******************************************************************************
  * Save the database.
@@ -281,6 +287,14 @@ void save_database(hospital_record_t *records) {
 
     /* Close the database file */
     fclose(db);
+
+    /* Compress the database */
+    printf("Compressing database\n");
+    compress_file(db_name, "compressed.db");
+    printf("Compressed database\n");
+    
+    /* Remove the database file */
+    /* remove(db_name); */
 }
 
 

@@ -3,8 +3,8 @@
 #include "application/compression.h"
 
 void compress_file(const char *input, const char *output) {
-    FILE *fin = fopen(input, "r");
-    FILE *fout = fopen(output, "w");
+    FILE *fin = fopen(input, "rb");
+    FILE *fout = fopen(output, "wb");
 
     if (!fin || !fout) {
         printf("Error opening file!\n");

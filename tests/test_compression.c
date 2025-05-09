@@ -11,6 +11,8 @@ int main() {
         printf("Failed to create test input.\n");
         return 1;
     }
+    char a = 0x61; // 'a'
+    
     fprintf(f, "aaabbbcccaaa");
     fclose(f);
 

@@ -89,15 +89,20 @@ void test_load_save_database() {
 
     /* Load the database */
     hospital_record_t *records = load_database(hospital_name);
+    printf("Loaded database\n");
 
     /* Seed the database */
     test_seed_data(records);
 
     /* Save the database */
+    printf("Saving database\n");
     save_database(records);
+    printf("Saved database\n");
 
     /* Load the database again */
+    printf("Loading database\n");
     hospital_record_t *records_loaded = load_database(hospital_name);
+    printf("Loaded database\n");
 
     /* Check if Homer is found */
     doctor_details_t *doctor = find_doctor(records_loaded, "1");
