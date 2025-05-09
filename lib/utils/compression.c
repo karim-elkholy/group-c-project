@@ -26,9 +26,8 @@ void compress_file(const char *input, const char *output) {
         return;
     }
 
-    /* Read the first character to begin compression */
-    char prev = fgetc(fin);
-    if (prev == EOF) {
+    char prev;
+    if (fread(&prev, sizeof(char), 1, fin) != 1) {
         fclose(fin);
         fclose(fout);
         return;
@@ -36,24 +35,23 @@ void compress_file(const char *input, const char *output) {
 
     int count = 1;
     char curr;
-    /* Loop through remaining characters */
-    while ((curr = fgetc(fin)) != EOF) {
+    while (fread(&curr, sizeof(char), 1, fin) == 1) {
         if (curr == prev) {
             count++;
         } else {
-            /* Write the character and its repeat count */
-            fprintf(fout, "%c%d", prev, count);
+            fwrite(&prev, sizeof(char), 1, fout);
+            fwrite(&count, sizeof(int), 1, fout);
             prev = curr;
             count = 1;
         }
     }
-    /* Write the last character and count */
-    fprintf(fout, "%c%d", prev, count);
+
+    fwrite(&prev, sizeof(char), 1, fout);
+    fwrite(&count, sizeof(int), 1, fout);
 
     fclose(fin);
     fclose(fout);
 }
-
 
 /*******************************************************************************
  * Decompresses a file previously compressed with RLE.
@@ -81,11 +79,11 @@ void decompress_file(const char *input, const char *output) {
     char ch;
     int count;
     /* Read each character and repeat count */
-    while (fscanf(fin, "%c%d", &ch, &count) == 2) {
-        int i;
-        for (i = 0; i < count; i++) {
-            fputc(ch, fout);
-        }
+    while (fread(&ch, sizeof(char), 1, fin) == 1 &&
+       fread(&count, sizeof(int), 1, fin) == 1) {
+    for (int i = 0; i < count; i++) {
+        fputc(ch, fout);
+    }
     }
 
     fclose(fin);

@@ -1,24 +1,23 @@
 #include <stdio.h>
-#include "../lib/application/compression.c"
+#include "utils/compression.h"  
 
 int main() {
     const char *input = "test_input.txt";
-    const char *compressed = "compressed.txt";
+    const char *compressed = "compressed.rle";
     const char *decompressed = "decompressed.txt";
 
-    FILE *f = fopen(input, "w");
+    FILE *f = fopen(input, "wb");
     if (f == NULL) {
         printf("Failed to create test input.\n");
         return 1;
     }
-    char a = 0x61; // 'a'
-    
+
     fprintf(f, "aaabbbcccaaa");
     fclose(f);
 
     compress_file(input, compressed);
     decompress_file(compressed, decompressed);
 
-    printf("Compression and decompression completed.\n");
+    printf("✅ Compression and decompression completed.\n");
     return 0;
 }
