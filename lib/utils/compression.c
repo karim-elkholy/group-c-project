@@ -78,12 +78,13 @@ void decompress_file(const char *input, const char *output) {
 
     char ch;
     int count;
+    int i = 0;
     /* Read each character and repeat count */
     while (fread(&ch, sizeof(char), 1, fin) == 1 &&
        fread(&count, sizeof(int), 1, fin) == 1) {
-    for (int i = 0; i < count; i++) {
-        fputc(ch, fout);
-    }
+        for (i=0; i < count; i++) {
+            fputc(ch, fout);
+        }
     }
 
     fclose(fin);
