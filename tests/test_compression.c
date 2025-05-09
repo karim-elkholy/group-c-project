@@ -18,6 +18,6 @@ int main() {
     compress_file(input, compressed);
     decompress_file(compressed, decompressed);
 
-    printf("✅ Compression and decompression completed.\n");
+    printf("Compression and decompression completed.\n");
     return 0;
 }
