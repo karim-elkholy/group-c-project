@@ -30,7 +30,6 @@ unsigned char gf_multiply_2_8(const unsigned char a, const unsigned char b);
 void gf_multiply_2_128(
     const unsigned char a[16],
     const unsigned char b[16],
-    int n_bytes,
     unsigned char result[16]
 );
 

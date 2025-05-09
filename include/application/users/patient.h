@@ -69,6 +69,17 @@ void patient_signup_silent(
  ******************************************************************************/
 void patient_signup(hospital_record_t *records);
 
+
+/*******************************************************************************
+ * Prints the patient details.
+ * 
+ * inputs:
+ * - patient - The patient to print
+ * outputs:
+ * - none
+ ******************************************************************************/
+void print_patient_details(patient_details_t *patient);
+
 /*******************************************************************************
  * Finds a patient by their ID.
  * 

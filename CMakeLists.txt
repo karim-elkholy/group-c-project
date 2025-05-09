@@ -11,7 +11,7 @@ project("Hospital" C)
 # add_compile_options(-ansi)
 # For development we can use gnu89
 # This allows // comments 
-add_compile_options(-std=gnu89)
+add_compile_options(-ansi)
 # Treat warnings as errors
 add_compile_options(-Wall -Werror)
 # Adhere strictly to the above specified C standard

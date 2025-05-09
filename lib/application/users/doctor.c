@@ -154,25 +154,6 @@ doctor_details_t *find_doctor(
     return NULL;
 }
 
-/*******************************************************************************
- * Prints the choices available for the doctor menu.
- * 
- * inputs:
- * - none
- * outputs:
- * - none
- *******************************************************************************/
-void print_doctor_menu()
-{
-	printf("\n Doctor Menu \n"
-		   "1. Register a new patient\n"
-		   "2. View all patients\n"
-		   "3. View a patient's details\n"
-		   "4. Delete a patient\n"
-		   "5. Add a new doctor\n"
-		   "6. Exit\n");
-}
-
 
 /*******************************************************************************
  * View all patients in the hospital records.
@@ -196,6 +177,41 @@ void view_all_patients(hospital_record_t *records) {
  *******************************************************************************/
 void view_patient_details(hospital_record_t *records) {
 
+    /* Ask the user for the username of the patient to view */
+    char username[256];
+    read_string("Enter the username of the patient to view: ", username, 
+        sizeof(username));
+
+    /* Find the patient in the hospital records */
+    patient_details_t *patient = find_patient(records, username);
+
+    /* If the patient is not found, print an error message */
+    if (patient == NULL) {
+        printf("Patient not found\n");
+        return;
+    }
+
+    /* Print the patient details */
+    print_patient_details(patient);
+}
+
+/*******************************************************************************
+ * Prints the choices available for the doctor menu.
+ * 
+ * inputs:
+ * - none
+ * outputs:
+ * - none
+ *******************************************************************************/
+void print_doctor_menu()
+{
+	printf("\n Doctor Menu \n"
+		   "1. Register a new patient\n"
+		   "2. View all patients\n"
+		   "3. View a patient's details\n"
+		   "4. Delete a patient\n"
+		   "5. Add a new doctor\n"
+		   "6. Exit\n");
 }
 
 /*******************************************************************************
@@ -210,7 +226,7 @@ void doctor_use(hospital_record_t *records, doctor_details_t *doctor) {
     /* Print a welcome message to the doctor */
     printf("Welcome %s\n", doctor->name);
 
-    // Show the available choices
+    /* Show the available choices */
     print_doctor_menu();
 
 	/* Get the user's choice */
@@ -226,6 +242,7 @@ void doctor_use(hospital_record_t *records, doctor_details_t *doctor) {
             case '2':
                 break;
             case '3':
+                view_patient_details(records);
                 break;
             case '4':
                 break;

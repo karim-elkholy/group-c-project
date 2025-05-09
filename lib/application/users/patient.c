@@ -167,6 +167,30 @@ patient_details_t *find_patient(hospital_record_t *records,
 }
 
 /*******************************************************************************
+ * Prints the patient details.
+ * 
+ * inputs:
+ * - patient - The patient to print
+ * outputs:
+ * - none
+ ******************************************************************************/
+void print_patient_details(patient_details_t *patient) {
+
+    /* Print the patient details */
+    printf("Username: %s\n", patient->username);
+    printf("Name: %s\n", patient->name);
+    printf("Email: %s\n", patient->email);
+    printf("Phone: %s\n", patient->phone);
+    printf("Blood type: %s\n", patient->blood_type);
+    printf("Medical history: %s\n", patient->medical_history);
+    printf("Allergies: %s\n", patient->allergies);  
+    printf("Medications: %s\n", patient->medications);
+    printf("Weight: %f\n", patient->weight);
+    printf("Height: %f\n", patient->height);
+    printf("Notes: %s\n", patient->notes);
+}
+
+/*******************************************************************************
  * Prints the patient menu.
  * 
  * inputs:

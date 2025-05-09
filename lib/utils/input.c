@@ -59,7 +59,8 @@ int is_valid_email(const char *email) {
     }
 
     /* Create a working copy of the email */
-    char *working_email = strdup(email);
+    char *working_email = (char *) malloc(strlen(email) * sizeof(char));
+    strcpy(working_email, email);
     
     /* Holds whether the email is valid */
     /* By default, assume the email is invalid */

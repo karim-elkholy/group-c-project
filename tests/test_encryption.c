@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h> 
 #include <string.h> 
@@ -247,7 +246,7 @@ void test_aes_gcm_all() {
     /* Ignore this it is being worked on */
     
     /* Number of test cases */
-    const int num_test_cases = 3;
+    const int num_test_cases = 7;
 
     /* Allocate memory to hold the details of each test case */
     /* Plaintext */
@@ -256,122 +255,166 @@ void test_aes_gcm_all() {
     int *plaintext_sizes = malloc(num_test_cases * sizeof(int));
     /* Key */
     unsigned char **keys = malloc(num_test_cases * sizeof(unsigned char *));
+    /* Key size */
+    int *key_sizes = malloc(num_test_cases * sizeof(int));
     /* Nonce */
     unsigned char **nonces = malloc(num_test_cases * sizeof(unsigned char *));
-    /* AAD */
+    /* Nonce size */
+    int *nonce_sizes = malloc(num_test_cases * sizeof(int));
+    /* AAD(Additional Authentication Data)
+    * Data that is not encrypted but is authenticated */
     unsigned char **aads = malloc(num_test_cases * sizeof(unsigned char *));
+    /* AAD size*/
+    int *aad_sizes = malloc(num_test_cases * sizeof(int));
     /* Expected ciphertext */
     unsigned char **expected_ciphertexts = malloc(num_test_cases * sizeof(unsigned char *));
-    /* Expected tags */
+    /* Expected authentication tags */
     unsigned char **expected_tags = malloc(num_test_cases * sizeof(unsigned char *));
+
     /* Test case 1
     * The plaintext is actually empty. This is not a mistake or typo.
     * This is the first test case in the NIST document.
+    */
     plaintexts[0] = convert_hex_string_to_bytes("");
     plaintext_sizes[0] = 0;
     keys[0] = convert_hex_string_to_bytes("00000000000000000000000000000000");
+    key_sizes[0] = 16;
     nonces[0] = convert_hex_string_to_bytes("000000000000000000000000");
+    nonce_sizes[0] = 12;
     aads[0] = convert_hex_string_to_bytes("");
-    expected_ciphertexts[0] = convert_hex_string_to_bytes("00000000000000000000000000000000");
-     */
+    aad_sizes[0] = 0;
+    expected_ciphertexts[0] = convert_hex_string_to_bytes("");
+    expected_tags[0] = convert_hex_string_to_bytes("58e2fccefa7e3061367f1d57a4e7455a");
 
     /* Test case 2 */
     plaintexts[1] = convert_hex_string_to_bytes("00000000000000000000000000000000");
     plaintext_sizes[1] = 16;
     keys[1] = convert_hex_string_to_bytes("00000000000000000000000000000000");
+    key_sizes[1] = 16;
     nonces[1] = convert_hex_string_to_bytes("000000000000000000000000");
+    nonce_sizes[1] = 12;
     aads[1] = convert_hex_string_to_bytes("");
+    aad_sizes[1] = 0;
     expected_ciphertexts[1] = convert_hex_string_to_bytes("0388dace60b6a392f328c2b971b2fe78");
     expected_tags[1] = convert_hex_string_to_bytes("ab6e47d42cec13bdf53a67b21257bddf");
 
     /* Test case 3 */
     plaintexts[2] = convert_hex_string_to_bytes("d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b391aafd255");
     plaintext_sizes[2] = 64;
+
+
     keys[2] = convert_hex_string_to_bytes("feffe9928665731c6d6a8f9467308308");
+    key_sizes[2] = 16;
     nonces[2] = convert_hex_string_to_bytes("cafebabefacedbaddecaf888");
+    nonce_sizes[2] = 12;
     aads[2] = convert_hex_string_to_bytes("");
+    aad_sizes[2] = 0;
     expected_ciphertexts[2] = convert_hex_string_to_bytes("42831ec2217774244b7221b784d0d49ce3aa212f2c02a4e035c17e2329aca12e21d514b25466931c7d8f6a5aac84aa051ba30b396a0aac973d58e091473f5985");
     expected_tags[2] = convert_hex_string_to_bytes("4d5c2af327cd64a62cf35abd2ba6fab4");
+
+    /* Test case 4 */
+    plaintexts[3] = convert_hex_string_to_bytes("d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39");
+    plaintext_sizes[3] = 60;
+    keys[3] = convert_hex_string_to_bytes("feffe9928665731c6d6a8f9467308308");
+    key_sizes[3] = 16;
+    nonces[3] = convert_hex_string_to_bytes("cafebabefacedbaddecaf888");
+    nonce_sizes[3] = 12;
+    aads[3] = convert_hex_string_to_bytes("feedfacedeadbeeffeedfacedeadbeefabaddad2");
+    aad_sizes[3] = 20;
+    expected_ciphertexts[3] = convert_hex_string_to_bytes("42831ec2217774244b7221b784d0d49ce3aa212f2c02a4e035c17e2329aca12e21d514b25466931c7d8f6a5aac84aa051ba30b396a0aac973d58e091");
+    expected_tags[3] = convert_hex_string_to_bytes("5bc94fbc3221a5db94fae95ae7121a47");
+
+    /* Test case 5 */
+    plaintexts[4] = convert_hex_string_to_bytes("d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39");
+    plaintext_sizes[4] = 60;
+    keys[4] = convert_hex_string_to_bytes("feffe9928665731c6d6a8f9467308308");
+    key_sizes[4] = 16;
+    nonces[4] = convert_hex_string_to_bytes("cafebabefacedbad");
+    nonce_sizes[4] = 8;
+    aads[4] = convert_hex_string_to_bytes("feedfacedeadbeeffeedfacedeadbeefabaddad2");
+    aad_sizes[4] = 20;
+    expected_ciphertexts[4] = convert_hex_string_to_bytes("61353b4c2806934a777ff51fa22a4755699b2a714fcdc6f83766e5f97b6c742373806900e49f24b22b097544d4896b424989b5e1ebac0f07c23f4598");
+    expected_tags[4] = convert_hex_string_to_bytes("3612d2e79e3b0785561be14aaca2fccb");
+
+    /* Test case 6 */
+    plaintexts[5] = convert_hex_string_to_bytes("d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39");
+    plaintext_sizes[5] = 60;
+    keys[5] = convert_hex_string_to_bytes("feffe9928665731c6d6a8f9467308308");
+    key_sizes[5] = 16;
+    nonces[5] = convert_hex_string_to_bytes("9313225df88406e555909c5aff5269aa6a7a9538534f7da1e4c303d2a318a728c3c0c95156809539fcf0e2429a6b525416aedbf5a0de6a57a637b39b");
+    nonce_sizes[5] = 60;
+    aads[5] = convert_hex_string_to_bytes("feedfacedeadbeeffeedfacedeadbeefabaddad2");
+    aad_sizes[5] = 20;
+    expected_ciphertexts[5] = convert_hex_string_to_bytes("8ce24998625615b603a033aca13fb894be9112a5c3a211a8ba262a3cca7e2ca701e4a9a4fba43c90ccdcb281d48c7c6fd62875d2aca417034c34aee5");
+    expected_tags[5] = convert_hex_string_to_bytes("619cc5aefffe0bfa462af43c1699d050");
+
+    /* Test case 7 */
+    plaintexts[6] = convert_hex_string_to_bytes("");
+    plaintext_sizes[6] = 0;
+    keys[6] = convert_hex_string_to_bytes("000000000000000000000000000000000000000000000000");
+    key_sizes[6] = 24;
+    nonces[6] = convert_hex_string_to_bytes("000000000000000000000000");
+    nonce_sizes[6] = 12;
+    aads[6] = convert_hex_string_to_bytes("");
+    aad_sizes[6] = 0;
+    expected_ciphertexts[6] = convert_hex_string_to_bytes("");
+    expected_tags[6] = convert_hex_string_to_bytes("cd33b28ac773f74ba00ed1f312572435");
+
+    /* TODO:
+    * Skip rest of cases for now since they deal with keys greater than 16 bytes */
 
     /* Iterate over the test cases */
     int i;
     for (i = 0; i < num_test_cases; i++) {
 
-        /* If this is the first test case */
-        /* Temp - later start from 0 */
-        if (i == 0) {
+        /* Print the test case number */
+        printf("Test case %d\n", i + 1);
+
+        /* If the key size is not 16, skip the test case */
+        if (key_sizes[i] != 16) {
+            continue;
+        }
+
+        /* If the nonce is not 12 bytes, skip the test case */
+        if (nonce_sizes[i] != 12) {
             continue;
         }
 
         /* Encrypt the plaintext */
         aes_gcm_encrypted_data_t *enc_data = aes_encrypt_gcm(
-            plaintexts[i], plaintext_sizes[i], keys[i], 16, nonces[i]
+            plaintexts[i], plaintext_sizes[i],
+            keys[i], 16,
+            aads[i], aad_sizes[i],
+            nonces[i]
         );
 
-        /* Iterate over the ciphertext */
-        int j;
-        for (j = 0; j < enc_data->ciphertext_length; j++) {
-            /* If the ciphertext doesn't match the expected ciphertext */
-            if (enc_data->ciphertext[j] != expected_ciphertexts[i][j]) {
-                printf("Test failed\n");
-                printf("Expected: %s\n", convert_bytes_to_hex_string(
-                    expected_ciphertexts[i], 
-                    enc_data->ciphertext_length)
-                );
-                printf("Actual: %s\n", convert_bytes_to_hex_string(
-                    enc_data->ciphertext, 
-                    enc_data->ciphertext_length)
-                );
-                exit(1);
-            }
+        /* Compare the ciphertexts */
+        if ( memcmp(enc_data->ciphertext, expected_ciphertexts[i], enc_data->ciphertext_length) != 0 ) {
+            printf("Test failed\n");
+            printf("Ciphertexts do not match\n");
+            printf("Expected: %s\n", convert_bytes_to_hex_string(
+                expected_ciphertexts[i], 
+                enc_data->ciphertext_length)
+            );
+            printf("Actual: %s\n", convert_bytes_to_hex_string(
+                enc_data->ciphertext, 
+                enc_data->ciphertext_length)
+            );
+            exit(1);
         }
 
+        
+        /* Compare the tag */
+        if (memcmp(enc_data->tag, expected_tags[i], 16) != 0) {
+            printf("Test failed\n");
+            printf("Authentication tags do not match\n");
+            printf("Expected: %s\n", convert_bytes_to_hex_string(expected_tags[i], 16));
+            printf("Actual: %s\n", convert_bytes_to_hex_string(enc_data->tag, 16));
+            exit(1);
+        }
+
+
     }
-}
-
-/* Taken from https://csrc.nist.rip/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-spec.pdf*/
-void test_aes_gcm_encrypt_case_2() {
-    /* 16 byte message */
-    /* All zeros */
-    const unsigned char plaintext[16] = {0};
-    
-    /* 16 byte key */
-    /* All zeros */
-    const unsigned char key[16] = {0};
-
-    /* Nonce to use for encryption */
-    const unsigned char nonce[12] = {0};
-
-    /* Encrypt the message */
-    aes_encrypt_gcm(plaintext, 16, key, 16, nonce);
-}
-
-/* Taken from https://csrc.nist.rip/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-spec.pdf*/
-void test_aes_gcm_encrypt_case_3() {
-    /* 60 byte message */
-    const unsigned char plaintext[64] = {
-        0xd9, 0x31, 0x32, 0x25, 0xf8, 0x84, 0x06, 0xe5, 0xa5, 0x59, 0x09, 0xc5, 0xaf, 0xf5, 0x26, 0x9a,
-        0x86, 0xa7, 0xa9, 0x53, 0x15, 0x34, 0xf7, 0xda, 0x2e, 0x4c, 0x30, 0x3d, 0x8a, 0x31, 0x8a, 0x72,
-        0x1c, 0x3c, 0x0c, 0x95, 0x95, 0x68, 0x09, 0x53, 0x2f, 0xcf, 0x0e, 0x24, 0x49, 0xa6, 0xb5, 0x25,
-        0xb1, 0x6a, 0xed, 0xf5, 0xaa, 0x0d, 0xe6, 0x57, 0xba, 0x63, 0x7b, 0x39, 0x1a, 0xaf, 0xd2, 0x55
-    };
-    
-    /* 16 byte key */
-    const unsigned char key[16] = {
-        0xfe, 0xff, 0xe9, 0x92, 0x86, 0x65, 0x73, 0x1c,
-        0x6d, 0x6a, 0x8f, 0x94, 0x67, 0x30, 0x83, 0x08
-    };
-    
-    /* 12 byte nonce */
-    const unsigned char nonce[12] = {
-        0xca, 0xfe, 0xba, 0xbe, 0xfa, 0xce, 0xdb, 0xad,
-        0xde, 0xca, 0xf8, 0x88
-    };
-    
-    /* Encrypt the message */
-    aes_encrypt_gcm(plaintext, 64, key, 16, nonce);
-    
-    
 }
 
 int main() {
@@ -384,17 +427,14 @@ int main() {
 
     /* Test AES-GCM */
 
-
-
     test_run_method("convert bytes to hex string", test_bytes_to_hex_str);
     test_run_method("convert hex string to bytes", test_hex_str_to_bytes);
     test_run_method("FIPS examples", test_fips_example);
     test_run_method("AES 128 encrypt", test_aes_128_encrypt);
     test_run_method("AES 192 encrypt", test_aes_192_encrypt);
     test_run_method("AES 256 encrypt", test_aes_256_encrypt);
-    test_run_method("AES-GCM encrypt case 2", test_aes_gcm_encrypt_case_3); 
-    test_run_method("AES-GCM encrypt case 3", test_aes_gcm_encrypt_case_3);
     test_run_method("AES-GCM all", test_aes_gcm_all);
+
     exit(0);
 
     return 0;

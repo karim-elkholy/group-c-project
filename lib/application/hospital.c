@@ -164,7 +164,7 @@ void use(const char *hospital_name)
     /* Load the database */
     hospital_record_t *records = load_database(hospital_name);
 
-    // Show the available choices
+    /* Show the available choices */
     print_menu();
 
 	/* Get the user's choice */

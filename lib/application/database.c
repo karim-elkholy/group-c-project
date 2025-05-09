@@ -28,7 +28,7 @@ hospital_record_t *database_init(const char *hospital_name) {
     records->doctors = NULL;
     records->patients = NULL;
 
-    // Return the database
+    /* Return the database */
     return records;
 }
 
@@ -61,8 +61,6 @@ hospital_record_t *load_database(const char *hospital_name) {
         /* Assume the database is empty */
         return records;
     }
-
-    /* TODO - Later decrypt the database */
 
     /* -----------------------------------------------------------------------*/
     /* Doctors section */
@@ -179,7 +177,7 @@ hospital_record_t *load_database(const char *hospital_name) {
     fclose(db);
 
     /* Remove the database file */
-    /* remove(db_name); */
+    remove(db_name);
 
     /* Return the list of users */
     return records;
@@ -208,8 +206,6 @@ void save_database(hospital_record_t *records) {
         printf("Error: Failed to open stored database file.\n");
         exit(1);
     }
-
-    /* TODO - Later encrypt the database */
 
     /* -----------------------------------------------------------------------*/
     /* Doctors section */
@@ -289,12 +285,10 @@ void save_database(hospital_record_t *records) {
     fclose(db);
 
     /* Compress the database */
-    printf("Compressing database\n");
     compress_file(db_name, "compressed.db");
-    printf("Compressed database\n");
     
     /* Remove the database file */
-    /* remove(db_name); */
+    remove(db_name); 
 }
 
 

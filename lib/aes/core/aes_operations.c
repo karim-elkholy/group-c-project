@@ -219,7 +219,7 @@ unsigned char gf_multiply_2_8(const unsigned char a, const unsigned char b)
     return result[0];
 }
 
-void gf_multiply_2_128(const unsigned char a[16], const unsigned char b[16], int n_bytes, unsigned char result[16])
+void gf_multiply_2_128(const unsigned char a[16], const unsigned char b[16], unsigned char result[16])
 {
     /* Create the irreducible polynomial */
     unsigned char irreducible[16] = {0};
