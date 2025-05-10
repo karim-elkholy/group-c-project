@@ -3,10 +3,11 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "aes/core/aes.h"
-#include "aes/core/aes_keyschedule.h"
-#include "aes/core/aes_operations.h"
+#include "aes/aes_core.h"
+#include "aes/aes_keyschedule.h"
+#include "aes/aes_operations.h"
 #include "aes/maths/gf.h"
+
 
 /*******************************************************************************
  * Transforms an array of bytes to a state matrix.
@@ -67,7 +68,7 @@ void convert_to_byte_array(byte state[4][4], unsigned char *output)
  * outputs:
  * - None.
 *******************************************************************************/
-void aes_encrypt(const byte *input, const byte *key, int key_size, byte *output)
+void aes_encrypt_block(const byte *input, const byte *key, int key_size, byte *output)
 {
     /* Declare variables */
     int i;
@@ -121,66 +122,48 @@ void aes_encrypt(const byte *input, const byte *key, int key_size, byte *output)
  * - key - The 128, 192, or 256 bit key to use for decryption.
  * - output - The output to store the decrypted data.
  * outputs:
- * - The decrypted output.
+ * - None.
 *******************************************************************************/
-/*
-byte *aes_decrypt(const byte *input, const byte *key, int key_size, byte *output)
-{
-
-}
-*/
-
-aes_encrypted_result *aes_encrypt_bytes(
-    const byte *input, int input_size, const byte *key, int key_size)
+void aes_decrypt_block(const byte *input, const byte *key, int key_size, byte *output)
 {
     /* Declare variables */
-    aes_encrypted_result *result;
-    byte padded_block[16];
-    int padding_length;
-    int num_blocks;
-    byte *output;
     int i;
+    byte input_state[4][4];
 
-    /* Assume key size is 128 bits. */
-    if (key_size != 16 && key_size != 24 && key_size != 32)
-    {
-        printf("Key size: %d\n", key_size);
-        printf("Invalid key size\n");
-        exit(0);
+    /* Get the keys for each round. */
+    roundKeys_t *round_keys = key_expansion(key, key_size);
+
+    /* Convert the input to a state matrix. */
+    convert_bytes_to_state_matrix(input, input_state);
+
+    /***** Other rounds *****/
+    for (i = round_keys->count - 1; i > 0; i--) {
+
+        /* Add the current round key to the input. */
+        const unsigned char *current_round_key = round_keys->keys + (i * 16);
+        add_round_key(input_state, current_round_key);
+
+        /* If this is the not the last round, mix the columns. */
+        if (i != round_keys->count - 1) {
+            inv_mix_columns(input_state);
+        }
+
+        /* Use the inv_sub_bytes */
+        inv_sub_bytes(input_state);
+
+        /* Use the inv_shift_rows */
+        inv_shift_rows(input_state);        
     }
 
-    /* Determine the length of padding needed for the last input block. */
-    padding_length = 16 - (input_size % 16);
+    /***** First round *****/
+    /* Add the first round key to the input. */
+    const unsigned char *first_round_key = round_keys->keys;
+    add_round_key(input_state, first_round_key);
 
-    /* Split the input into blocks of 16 bytes.
-     * An extra block will be needed if the input is a multiple of 16
-     */
-    num_blocks = input_size / 16 + 1;
+    /* Free the round keys. */
+    free(round_keys->keys);
+    free(round_keys);
 
-    /* Holds the encrypted output. */
-    output = (byte *)malloc(num_blocks * 16 * sizeof(byte));
-
-    /* Encrypt the input in 16 byte increments. */
-    for (i = 0; i < num_blocks - 1; i++)
-    {
-        /* Encrypt the input in 16 byte increments. */
-        aes_encrypt(input + (i * 16), key, key_size, output + (i * 16));
-    }
-
-    /* Create the final block with PKCS#7 padding. */
-    memset(padded_block, padding_length, 16);
-
-    /* Copy the remaining data to the padded block. */
-    memcpy(padded_block, input + (num_blocks - 1) * 16, input_size % 16);
-    aes_encrypt(padded_block, key, key_size, output + ((num_blocks - 1) * 16));
-
-    /* NOTE this uses ECB mode which is different from CBC mode */
-
-    /* Create the result struct. */
-    result = (aes_encrypted_result *)malloc(sizeof(aes_encrypted_result));
-    result->bytes = output;
-    result->size = num_blocks * 16;
-
-    /* Return the encrypted output. */
-    return result;
+    /* Convert the output state matrix to a byte array. */
+    convert_to_byte_array(input_state, output);
 }

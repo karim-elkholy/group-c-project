@@ -1,6 +1,6 @@
 
-#include "aes/core/aes_keyschedule.h"
-#include "aes/core/aes_operations.h"
+#include "aes/aes_keyschedule.h"
+#include "aes/aes_operations.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -255,7 +255,7 @@ void key_expansion_expand_keys(
             if (context->key_size == 32)
             {
                 key_expansion_handle_256_key(context, current_word);
-            }
+            } 
         }
 
         /* Final step of key expansion for the current word */

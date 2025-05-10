@@ -2,10 +2,10 @@
 #include <stdlib.h> 
 #include <string.h> 
 
-#include "aes/core/aes.h"
+#include "aes/aes_core.h"
 #include "aes/gcm.h"
 #include "utils/hex.h"
-#include "aes/core/aes_operations.h"
+#include "aes/aes_operations.h"
 
 void test_bytes_to_hex_str() {
     
@@ -80,7 +80,8 @@ void test_fips_example() {
     int key_sizes[3];
 
     /* Input: "00112233445566778899aabbccddeeff" (16 bytes) */
-    byte *input_bytes = convert_hex_string_to_bytes("00112233445566778899aabbccddeeff");
+    byte *input_bytes = convert_hex_string_to_bytes("00112233445566778899AABBCCDDEEFF");
+    const char *input_hex = "00112233445566778899AABBCCDDEEFF";
 
     /* Key: "000102030405060708090a0b0c0d0e0f" (16 bytes) */
     byte *key_bytes_16 = convert_hex_string_to_bytes("000102030405060708090a0b0c0d0e0f");
@@ -111,16 +112,14 @@ void test_fips_example() {
     for (i = 0; i < 3; i++) {
 
         /* Expected output: "69c4e0d86a7b0430d8cdb78070b4c55a" */
-        aes_encrypted_result *result = aes_encrypt_bytes(input_bytes, 16, keys[i], key_sizes[i]);
-
+        unsigned char result[16];
+        aes_encrypt_block(input_bytes, keys[i], key_sizes[i], result);
+      
         /* Convert the result to a hex string */
-        char *result_hex = convert_bytes_to_hex_string(result->bytes, result->size);
+        char *result_hex = convert_bytes_to_hex_string(result, 16);
 
-        /* If the result starts with the expected hex 
-         * Consider the test passed 
-         * Because the FIPS-197 examples do not include the padding 
-         */
-        if (strncmp(result_hex, expected_hex[i], strlen(expected_hex[i])) != 0) {
+        /* Ensure the result matches the expected hex */
+        if ( strcmp(result_hex, expected_hex[i]) != 0 ) {
             printf("Test failed\n");
             printf("Key size: %d\n", key_sizes[i]);
             printf("Expected: %s\n", expected_hex[i]);
@@ -128,10 +127,23 @@ void test_fips_example() {
             exit(1);
         }
 
+        /*Test decryption*/
+        unsigned char decrypted_result[16];
+        aes_decrypt_block(result, keys[i], key_sizes[i], decrypted_result);
+
+        /* Convert the decrypted result to a hex string */
+        char *decrypted_result_hex = convert_bytes_to_hex_string(decrypted_result, 16);
+
+        /* Ensure the decrypted result matches the input */
+        if ( strcmp(decrypted_result_hex, input_hex) != 0 ) {
+            printf("Test failed\n");
+            printf("Decrypted result: %s\n", decrypted_result_hex);
+            printf("Input: %s\n", input_hex);
+            exit(1);
+        }
+
         /* Free the result & the current key */
         free(keys[i]);
-        free(result->bytes);
-        free(result);
         free(result_hex);
     }
 
@@ -139,114 +151,14 @@ void test_fips_example() {
     free(input_bytes);
 }
 
-void test_aes_128_encrypt() {
-
-    /* 16 byte message */
-    /* Plaintext: "Turtles are cool" */
-    const byte *msg = (byte *)"Turtles are cool";
-
-    /* 16 byte key */
-    /* Key: "Cats are weirdos" */
-    const byte *key = (byte *)"Cats are weirdos";
-
-    /* Expected output */
-    const char *expected_output = "24D81B412E3B205A8D4D202DB5472A18C0E0CA118F2D9E068E76CE2888D836B0";
-
-    /* Encrypt the message */
-    /* Retrieved from https://www.devglan.com/online-tools/aes-encryption-decryption */
-    aes_encrypted_result *result = aes_encrypt_bytes(msg, 16, key, 16);
-
-    /* Convert the result to a hex string */
-    char *result_hex = convert_bytes_to_hex_string(result->bytes, result->size);
-
-    /* Compare the actual output with the expected output */
-    if (strcmp(result_hex, expected_output) != 0) {
-        printf("Test failed\n");
-        printf("Expected: %s\n", expected_output);
-        printf("Actual: %s\n", result_hex);
-        exit(1);
-    }
-
-    /* Free the result */
-    free(result->bytes);
-    free(result);
-    free(result_hex);
-}
-
-void test_aes_192_encrypt() {
-
-    /* 16 byte message */
-    /* Plaintext: "Turtles are cool" */
-    const byte *msg = (byte *)"Turtles are cool";
-
-    /* 32 byte key */
-    /* Key: "32 characters is more than 24 :(" */
-    const byte *key = (byte *)"32 characters is more than 24 :(";
-
-    /* Expected output */
-    /* Retrieved from https://www.devglan.com/online-tools/aes-encryption-decryption */
-    const char *expected_output = "257A346376C0B039EBCAFAFB441AC8ABD297BCE2FF660D228281608815094850";
-
-    /* Encrypt the message */
-    aes_encrypted_result *result = aes_encrypt_bytes(msg, 16, key, 32);
-
-    /* Convert the result to a hex string */
-    char *result_hex = convert_bytes_to_hex_string(result->bytes, result->size);
-
-    /* Compare the actual output with the expected output */
-    if (strcmp(result_hex, expected_output) != 0) {
-        printf("Test failed\n");
-        printf("Expected: %s\n", expected_output);
-        printf("Actual: %s\n", result_hex);
-        exit(1);
-    }
-
-    /* Free the result */
-    free(result->bytes);
-    free(result);
-    free(result_hex);
-}
-
-void test_aes_256_encrypt() {
-
-    /* 16 byte message */
-    /* Plaintext: "Turtles are cool" */
-    const byte *msg = (byte *)"Turtles are cool";
-
-    /* 24 byte key */
-    /* Key: "24 characters is a lot ." */
-    const byte *key = (byte *)"24 characters is a lot .";
-
-    /* Expected output */
-    /* Retrieved from https://www.devglan.com/online-tools/aes-encryption-decryption */
-    const char *expected_output = "37FF5F80C1F7A20579A4C825AC8AE5B7FED03DBCDD212C3D36339D0DA613D8C7";
-
-    /* Encrypt the message */
-    aes_encrypted_result *result = aes_encrypt_bytes(msg, 16, key, 24);
-
-    /* Convert the result to a hex string */
-    char *result_hex = convert_bytes_to_hex_string(result->bytes, result->size);
-
-    /* Compare the actual output with the expected output */
-    if (strcmp(result_hex, expected_output) != 0) {
-        printf("Test failed\n");
-        printf("Expected: %s\n", expected_output);
-        printf("Actual: %s\n", result_hex);
-        exit(1);
-    }
-
-    /* Free the result */
-    free(result->bytes);
-    free(result);
-    free(result_hex);
-}
-
 void test_aes_gcm_all() {
 
-    /* Ignore this it is being worked on */
-    
+    /* Implements test cases from NIST GCM specification 
+     * Only implements test cases for AES-128 and 12-byte nonces.
+     */
+
     /* Number of test cases */
-    const int num_test_cases = 7;
+    const int num_test_cases = 4;
 
     /* Allocate memory to hold the details of each test case */
     /* Plaintext */
@@ -324,64 +236,15 @@ void test_aes_gcm_all() {
     expected_ciphertexts[3] = convert_hex_string_to_bytes("42831ec2217774244b7221b784d0d49ce3aa212f2c02a4e035c17e2329aca12e21d514b25466931c7d8f6a5aac84aa051ba30b396a0aac973d58e091");
     expected_tags[3] = convert_hex_string_to_bytes("5bc94fbc3221a5db94fae95ae7121a47");
 
-    /* Test case 5 */
-    plaintexts[4] = convert_hex_string_to_bytes("d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39");
-    plaintext_sizes[4] = 60;
-    keys[4] = convert_hex_string_to_bytes("feffe9928665731c6d6a8f9467308308");
-    key_sizes[4] = 16;
-    nonces[4] = convert_hex_string_to_bytes("cafebabefacedbad");
-    nonce_sizes[4] = 8;
-    aads[4] = convert_hex_string_to_bytes("feedfacedeadbeeffeedfacedeadbeefabaddad2");
-    aad_sizes[4] = 20;
-    expected_ciphertexts[4] = convert_hex_string_to_bytes("61353b4c2806934a777ff51fa22a4755699b2a714fcdc6f83766e5f97b6c742373806900e49f24b22b097544d4896b424989b5e1ebac0f07c23f4598");
-    expected_tags[4] = convert_hex_string_to_bytes("3612d2e79e3b0785561be14aaca2fccb");
-
-    /* Test case 6 */
-    plaintexts[5] = convert_hex_string_to_bytes("d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39");
-    plaintext_sizes[5] = 60;
-    keys[5] = convert_hex_string_to_bytes("feffe9928665731c6d6a8f9467308308");
-    key_sizes[5] = 16;
-    nonces[5] = convert_hex_string_to_bytes("9313225df88406e555909c5aff5269aa6a7a9538534f7da1e4c303d2a318a728c3c0c95156809539fcf0e2429a6b525416aedbf5a0de6a57a637b39b");
-    nonce_sizes[5] = 60;
-    aads[5] = convert_hex_string_to_bytes("feedfacedeadbeeffeedfacedeadbeefabaddad2");
-    aad_sizes[5] = 20;
-    expected_ciphertexts[5] = convert_hex_string_to_bytes("8ce24998625615b603a033aca13fb894be9112a5c3a211a8ba262a3cca7e2ca701e4a9a4fba43c90ccdcb281d48c7c6fd62875d2aca417034c34aee5");
-    expected_tags[5] = convert_hex_string_to_bytes("619cc5aefffe0bfa462af43c1699d050");
-
-    /* Test case 7 */
-    plaintexts[6] = convert_hex_string_to_bytes("");
-    plaintext_sizes[6] = 0;
-    keys[6] = convert_hex_string_to_bytes("000000000000000000000000000000000000000000000000");
-    key_sizes[6] = 24;
-    nonces[6] = convert_hex_string_to_bytes("000000000000000000000000");
-    nonce_sizes[6] = 12;
-    aads[6] = convert_hex_string_to_bytes("");
-    aad_sizes[6] = 0;
-    expected_ciphertexts[6] = convert_hex_string_to_bytes("");
-    expected_tags[6] = convert_hex_string_to_bytes("cd33b28ac773f74ba00ed1f312572435");
-
-    /* TODO:
-    * Skip rest of cases for now since they deal with keys greater than 16 bytes */
-
     /* Iterate over the test cases */
     int i;
     for (i = 0; i < num_test_cases; i++) {
 
         /* Print the test case number */
         printf("Test case %d\n", i + 1);
-
-        /* If the key size is not 16, skip the test case */
-        if (key_sizes[i] != 16) {
-            continue;
-        }
-
-        /* If the nonce is not 12 bytes, skip the test case */
-        if (nonce_sizes[i] != 12) {
-            continue;
-        }
-
+        
         /* Encrypt the plaintext */
-        aes_gcm_encrypted_data_t *enc_data = aes_encrypt_gcm(
+        aes_gcm_data_t *data_encrypted = aes_encrypt_gcm(
             plaintexts[i], plaintext_sizes[i],
             keys[i], 16,
             aads[i], aad_sizes[i],
@@ -389,31 +252,45 @@ void test_aes_gcm_all() {
         );
 
         /* Compare the ciphertexts */
-        if ( memcmp(enc_data->ciphertext, expected_ciphertexts[i], enc_data->ciphertext_length) != 0 ) {
+        if ( memcmp(data_encrypted->output, expected_ciphertexts[i], data_encrypted->output_length) != 0 ) {
             printf("Test failed\n");
             printf("Ciphertexts do not match\n");
             printf("Expected: %s\n", convert_bytes_to_hex_string(
                 expected_ciphertexts[i], 
-                enc_data->ciphertext_length)
+                data_encrypted->output_length)
             );
             printf("Actual: %s\n", convert_bytes_to_hex_string(
-                enc_data->ciphertext, 
-                enc_data->ciphertext_length)
+                data_encrypted->output, 
+                data_encrypted->output_length)
             );
             exit(1);
         }
 
         
-        /* Compare the tag */
-        if (memcmp(enc_data->tag, expected_tags[i], 16) != 0) {
+        /* Compare the authentication tag */
+        if (memcmp(data_encrypted->tag, expected_tags[i], 16) != 0) {
             printf("Test failed\n");
             printf("Authentication tags do not match\n");
             printf("Expected: %s\n", convert_bytes_to_hex_string(expected_tags[i], 16));
-            printf("Actual: %s\n", convert_bytes_to_hex_string(enc_data->tag, 16));
+            printf("Actual: %s\n", convert_bytes_to_hex_string(data_encrypted->tag, 16));
             exit(1);
         }
 
+        /* Decrypt the ciphertext */
+        aes_gcm_data_t *data_decrypted = aes_decrypt_gcm(
+            data_encrypted->output, data_encrypted->output_length,
+            keys[i], 16,
+            aads[i], aad_sizes[i],
+            nonces[i], 
+            data_encrypted->tag
+        );
 
+        /* Compare the decrypted plaintext */
+        if ( memcmp(data_decrypted->output, plaintexts[i], data_decrypted->output_length) != 0 ) {
+            printf("Test failed\n");
+            printf("Plaintexts do not match\n");
+            exit(1);
+        }
     }
 }
 
@@ -430,9 +307,6 @@ int main() {
     test_run_method("convert bytes to hex string", test_bytes_to_hex_str);
     test_run_method("convert hex string to bytes", test_hex_str_to_bytes);
     test_run_method("FIPS examples", test_fips_example);
-    test_run_method("AES 128 encrypt", test_aes_128_encrypt);
-    test_run_method("AES 192 encrypt", test_aes_192_encrypt);
-    test_run_method("AES 256 encrypt", test_aes_256_encrypt);
     test_run_method("AES-GCM all", test_aes_gcm_all);
 
     exit(0);
