@@ -1,5 +1,5 @@
-#ifndef AES_KEYSCHEDULE_H
-#define AES_KEYSCHEDULE_H
+#ifndef ENCRYPTION_AES_KEYSCHEDULE_H
+#define ENCRYPTION_AES_KEYSCHEDULE_H
 
 /*
  * Holds the round keys generated during the keySchedule process.

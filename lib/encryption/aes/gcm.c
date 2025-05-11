@@ -5,10 +5,10 @@
 
 #include "portable64/counter.h"
 #include "utils/random.h"
-#include "aes/aes_core.h"
-#include "aes/aes_keyschedule.h"
-#include "aes/aes_operations.h"
-#include "aes/gcm.h"
+#include "encryption/aes/core.h"
+#include "encryption/aes/keyschedule.h"
+#include "encryption/aes/operations.h"
+#include "encryption/aes/gcm.h"
 
 
 /* Context needed during GCM encryption */

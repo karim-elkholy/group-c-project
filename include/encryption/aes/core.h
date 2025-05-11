@@ -1,6 +1,6 @@
 
-#ifndef AES_H
-#define AES_H
+#ifndef ENCRYPTION_AES_CORE_H
+#define ENCRYPTION_AES_CORE_H
 
 /* An unsigned char is a byte */
 typedef unsigned char byte;

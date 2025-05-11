@@ -1,7 +1,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "aes/maths/gf.h"
+#include "encryption/aes/maths/gf.h"
 #include "utils/bitops.h"
 
 

@@ -1,6 +1,6 @@
 
-#ifndef AES_GCM_H
-#define AES_GCM_H
+#ifndef ENCRYPTION_GCM_H
+#define ENCRYPTION_GCM_H
 
 /* Holds data encrypted with AES-GCM */
 struct aes_gcm_data {

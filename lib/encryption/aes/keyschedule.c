@@ -1,6 +1,6 @@
 
-#include "aes/aes_keyschedule.h"
-#include "aes/aes_operations.h"
+#include "encryption/aes/keyschedule.h"
+#include "encryption/aes/operations.h"
 
 #include <stdlib.h>
 #include <string.h>

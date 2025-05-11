@@ -3,10 +3,10 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "aes/aes_core.h"
-#include "aes/aes_keyschedule.h"
-#include "aes/aes_operations.h"
-#include "aes/maths/gf.h"
+#include "encryption/aes/core.h"
+#include "encryption/aes/keyschedule.h"
+#include "encryption/aes/operations.h"
+#include "encryption/aes/maths/gf.h"
 
 
 /*******************************************************************************

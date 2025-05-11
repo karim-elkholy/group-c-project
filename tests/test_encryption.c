@@ -2,10 +2,10 @@
 #include <stdlib.h> 
 #include <string.h> 
 
-#include "aes/aes_core.h"
-#include "aes/gcm.h"
+#include "encryption/aes/core.h"
+#include "encryption/aes/gcm.h"
+#include "encryption/aes/operations.h"
 #include "utils/hex.h"
-#include "aes/aes_operations.h"
 
 void test_bytes_to_hex_str() {
     

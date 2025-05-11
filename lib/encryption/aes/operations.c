@@ -1,8 +1,9 @@
-#include "aes/aes_operations.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "aes/maths/gf.h"
+
+#include "encryption/aes/maths/gf.h"
+#include "encryption/aes/operations.h"
 
 /* Lookup table for the AES S-box */
 /* Needed by getSubByte() to map the input byte to a substitution byte */
