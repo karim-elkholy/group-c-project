@@ -42,6 +42,18 @@ int verify_user_password(unsigned int expected_password) {
     return 0;
 }
 
+void new_patient_signup(hospital_record_t *records) {
+
+    /* Sign up as a patient */
+    patient_details_t *patient = patient_signup(records);
+
+    /* Show a success message */
+    printf("Welcome %s\n", patient->name);
+
+    /* Return to the starting menu */
+    return;
+}
+    
 /*******************************************************************************
  * Handles access to the 'patient' menu.
  * Logs in a patient or provides signup option.
@@ -52,7 +64,30 @@ int verify_user_password(unsigned int expected_password) {
  ******************************************************************************/
 void use_patient_menu(hospital_record_t *records) {
 
-    /* TODO - Implement the patient menu */
+    /* Stylish login message*/
+    printf("--------------------------------\n");
+    printf("Patient Login \n");
+    printf("--------------------------------\n");
+
+    /* Store the user's ID */
+    char user_id[256];
+    read_string("Username: ", user_id, sizeof(user_id));
+    
+    /* Find the user */
+    patient_details_t *patient = find_patient(
+        records, user_id);
+
+    /* If the user is not found, print an error message */
+    if (patient == NULL) {
+        printf("No patient with ID %s found\n", user_id);
+        return;
+    }
+
+    /* Login to the patient menu if the user provides the correct password */
+    if (verify_user_password(patient->password) == 1) {
+        /* Call the patient menu */
+        patient_use(records, patient);
+    }
 }
 
 
@@ -105,7 +140,7 @@ void use_doctor_menu(hospital_record_t *records) {
     /* Login to the doctor menu if the user provides the correct password */
     if (verify_user_password(doctor->password) == 1) {
         /* Call the doctor menu */
-        /* doctor_menu(doctor); */
+        doctor_use(records, doctor);
     }
 }
 
@@ -119,6 +154,7 @@ void use_doctor_menu(hospital_record_t *records) {
  * - none
  ******************************************************************************/
 void print_menu() {
+    printf("A. Signup as Patient\n");
     printf("P. Login as Patient\n");
     printf("D. Login as Doctor\n");
     printf("M. Print this menu again\n");
@@ -174,22 +210,25 @@ void use(const char *hospital_name)
 		/* Process the menu choice */
 		switch (choice)
 		{
+            case 'A':
+                new_patient_signup(records);
+                break;
             case 'P':
                 use_patient_menu(records);
                 break;
             case 'D':
                 use_doctor_menu(records);
                 break;
-            case 'M':
-                print_menu();
-                break;
             default:
-                printf("Invalid choice\n");
+                printf("Invalid choice 2\n");
                 break;
         }
 
         /* Save the database */
         save_database(records);
+
+        /* Print the menu again */
+        print_menu();
 
 	}
 

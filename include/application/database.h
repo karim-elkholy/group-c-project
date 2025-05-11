@@ -5,6 +5,13 @@
 #include "application/users/patient.h"
 #include "application/users/doctor.h"
 
+/* Bed details */
+struct bed_details {
+    patient_details_t *patient;
+};
+
+typedef struct bed_details bed_details_t;
+
 /* Holds the hospital records */
 struct hospital_record {
 
@@ -20,6 +27,14 @@ struct hospital_record {
     int num_patients;
     /* Number of doctors */
     int num_doctors;
+
+    /* Beds */
+    bed_details_t *beds;
+
+    /* Number of beds (regardless of availability) */
+    int num_beds;
+    /* Number of beds being used */
+    int num_beds_in_use;
 };
 
 /*******************************************************************************

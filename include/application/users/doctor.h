@@ -63,8 +63,16 @@ void doctor_signup(hospital_record_t *records);
  ******************************************************************************/
 doctor_details_t *find_doctor(hospital_record_t *records, char *user_id);
 
-/* Entry point for the doctor menu.*/
-void doctor_menu(doctor_details_t *doctor);
+/*******************************************************************************
+ * Entry point for the doctor menu.
+ * 
+ * inputs:
+ * - records - The hospital records
+ * - doctor - The doctor to use
+ * outputs:
+ * - none
+ ******************************************************************************/
+void doctor_use(hospital_record_t *records, doctor_details_t *doctor);
 
 #endif
 

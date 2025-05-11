@@ -14,7 +14,7 @@
  * outputs:
  * - The user's input
  ******************************************************************************/
-void read_string(const char *prompt, char *input, int input_size);
+char *read_string(const char *prompt, char *input, int input_size);
 
 /*******************************************************************************
  * Used to read input from the user. Enforces a single character input.

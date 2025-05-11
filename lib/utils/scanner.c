@@ -11,19 +11,36 @@
  * outputs:
  * - The user's input
  ******************************************************************************/
-void read_string(const char *prompt, char *input, int input_size) {
+char *read_string(const char *prompt, char *input, int input_size) {
 
-    /* Print the prompt to the user */
+	/* Write the string to a large buffer first */
+	char buffer[1024];
+
+	/* Print the prompt to the user */
     printf("%s", prompt);
 
 	/* Exit with an error code if the user's input could not be read */
-	if (fgets(input, input_size, stdin) == NULL)
+	if (fgets(buffer, sizeof(buffer), stdin) == NULL)
 	{
 		exit(1);
 	}
 
 	/* Remove the newline character captured as part of fgets */
-	input[strcspn(input, "\n")] = '\0';
+	buffer[strcspn(buffer, "\n")] = '\0';
+
+	/* If the buffer is too large, exit with an error code */
+	if (strlen(buffer) >= input_size)
+	{
+		/* Return an empty string */
+		input[0] = '\0';
+		return input;
+	}
+
+	/* Copy the buffer to the input */
+	strcpy(input, buffer);
+
+	/* Return the input */
+	return input;
 }
 
 /*******************************************************************************

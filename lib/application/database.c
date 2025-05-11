@@ -21,6 +21,17 @@ hospital_record_t *database_init(const char *hospital_name) {
     records->num_patients = 0;
     records->num_doctors = 0;
 
+    /* Initialize 10 beds */
+    records->beds = (bed_details_t *)malloc(10 * sizeof(bed_details_t));
+    records->num_beds = 10;
+    records->num_beds_in_use = 0;
+
+    /* Initialize the beds since by default no patients are assigned to them */
+    int i;
+    for (i = 0; i < records->num_beds; i++) {
+        records->beds[i].patient = NULL;
+    }
+
     /* Hospital name */
     strcpy(records->hospital_name, hospital_name);
 

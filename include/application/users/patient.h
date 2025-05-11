@@ -65,10 +65,21 @@ void patient_signup_silent(
  * inputs:
  * - records - The hospital records
  * outputs:
- * - none
+ * - The newly created patient
  ******************************************************************************/
-void patient_signup(hospital_record_t *records);
+patient_details_t *patient_signup(hospital_record_t *records);
 
+/*******************************************************************************
+ * Updates the patient details.
+ * 
+ * inputs:
+ * - records - The hospital records
+ * - patient - The patient to update
+ ******************************************************************************/
+void update_patient_details(
+    hospital_record_t *records, 
+    patient_details_t *patient
+);
 
 /*******************************************************************************
  * Prints the patient details.
@@ -91,5 +102,23 @@ void print_patient_details(patient_details_t *patient);
  ******************************************************************************/
 patient_details_t *find_patient(hospital_record_t *records, char *user_id);
 
+/*******************************************************************************
+ * Deletes a patient from the hospital records.
+ * 
+ * inputs:
+ * - records - The hospital records
+ ******************************************************************************/
+void delete_patient(hospital_record_t *records);
+
+/*******************************************************************************
+ * Entry point to use the 'patient' menu.
+ * 
+ * inputs:
+ * - records - The hospital records
+ * - patient - The patient to use
+ * outputs:
+ * - none
+ *******************************************************************************/
+void patient_use(hospital_record_t *records, patient_details_t *patient);
 #endif
 
