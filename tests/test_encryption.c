@@ -244,7 +244,7 @@ void test_aes_gcm_all() {
         printf("Test case %d\n", i + 1);
         
         /* Encrypt the plaintext */
-        aes_gcm_data_t *data_encrypted = aes_encrypt_gcm(
+        aes_gcm_data_t *data_encrypted = aes_gcm_encrypt(
             plaintexts[i], plaintext_sizes[i],
             keys[i], 16,
             aads[i], aad_sizes[i],
@@ -277,7 +277,7 @@ void test_aes_gcm_all() {
         }
 
         /* Decrypt the ciphertext */
-        aes_gcm_data_t *data_decrypted = aes_decrypt_gcm(
+        aes_gcm_data_t *data_decrypted = aes_gcm_decrypt(
             data_encrypted->output, data_encrypted->output_length,
             keys[i], 16,
             aads[i], aad_sizes[i],

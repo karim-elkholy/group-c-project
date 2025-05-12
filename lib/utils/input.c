@@ -107,3 +107,47 @@ int is_valid_phone(const char *phone) {
     /* Return whether the phone number is all digits */
     return isAllDigits(phone);
 }
+
+/*******************************************************************************
+ * Validates whether the given blood type is valid.
+ * 
+ * inputs:
+ * - blood_type - The blood type to check.
+ * outputs:
+ * - 1 if the blood type is valid otherwise 0.
+ ******************************************************************************/
+int is_valid_blood_type(const char blood_type[256]) {
+    /* Check if the blood type is valid */
+    if (blood_type == NULL) {
+        return 0;
+    }
+
+    /* Convert the blood type to lowercase */
+    char blood_type_lower[256];
+    int i;
+    for (i = 0; i < strlen(blood_type); i++) {
+
+        /* Set the current character */
+        blood_type_lower[i] = blood_type[i];
+
+        /* If character is uppercase, convert to lowercase */
+        if (blood_type[i] >= 'A' && blood_type[i] <= 'Z') {
+            /* The lowercase equivalent is 32 places ahead in the ASCII table */
+            blood_type_lower[i] = blood_type_lower[i] + 32;
+        }
+    }
+    
+    /* Array of valid blood types */
+    char *valid_blood_types[] = {"a", "b", "ab", "o"};
+
+    /* Check if the blood type is valid */
+    for (i = 0; i < 4; i++) {
+        if (strcmp(blood_type_lower, valid_blood_types[i]) == 0) {
+            return 1;
+        }
+    }
+
+    /* Return 0 if the blood type is not valid */
+    return 0;
+}
+

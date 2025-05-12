@@ -136,29 +136,29 @@ void aes_decrypt_block(const byte *input, const byte *key, int key_size, byte *o
     /* Convert the input to a state matrix. */
     convert_bytes_to_state_matrix(input, input_state);
 
+    /* Add the initial round key to the input. */
+    /* Use the last round key. */
+    add_round_key(input_state, round_keys->keys + ((round_keys->count - 1) * 16));
+
     /***** Other rounds *****/
-    for (i = round_keys->count - 1; i > 0; i--) {
+    for (i = round_keys->count - 2; i >= 0; i--) {
+
+        /* InvShiftRows transformation. */
+        inv_shift_rows(input_state);   
+
+        /* InvSubBytes transformation. */
+        inv_sub_bytes(input_state);
 
         /* Add the current round key to the input. */
         const unsigned char *current_round_key = round_keys->keys + (i * 16);
         add_round_key(input_state, current_round_key);
 
-        /* If this is the not the last round, mix the columns. */
-        if (i != round_keys->count - 1) {
+        /* If this is not the last round, mix the columns. */
+        if (i != 0) {
+            /* InvMixColumns transformation. */
             inv_mix_columns(input_state);
         }
-
-        /* Use the inv_sub_bytes */
-        inv_sub_bytes(input_state);
-
-        /* Use the inv_shift_rows */
-        inv_shift_rows(input_state);        
     }
-
-    /***** First round *****/
-    /* Add the first round key to the input. */
-    const unsigned char *first_round_key = round_keys->keys;
-    add_round_key(input_state, first_round_key);
 
     /* Free the round keys. */
     free(round_keys->keys);

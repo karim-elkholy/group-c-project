@@ -3,7 +3,6 @@
 #include <string.h>
 #include <math.h>
 
-#include "portable64/counter.h"
 #include "utils/random.h"
 #include "encryption/aes/core.h"
 #include "encryption/aes/keyschedule.h"
@@ -32,16 +31,13 @@ struct aes_gcm_context
     unsigned char counter_block[16];
 
     /* The number of blocks needed for the plaintext */
-    int num_blocks_input;
+    /* int num_blocks_input; */
 
     /* The number of blocks needed for the AAD */
-    int num_blocks_aad;
+    /* int num_blocks_aad; */
 
     /* Holds the bytes processed */
     int bytes_processed;
-
-    /* Holds the keystream block */
-    unsigned char keystream_block[16];
 
     /* Holds the hash subkey
     * Used in GHASH calculations.
@@ -92,8 +88,6 @@ unsigned char *aes_gcm_generate_nonce()
  * - The GCM context.
  ******************************************************************************/
 aes_gcm_context_t *aes_gcm_context_init(
-    const unsigned char *input,
-    int input_size, 
     const unsigned char *key,
     int key_size,
     const unsigned char *aad,
@@ -103,14 +97,6 @@ aes_gcm_context_t *aes_gcm_context_init(
     /* Allocate memory for the context */
     aes_gcm_context_t *ctx = (aes_gcm_context_t *)malloc(
         sizeof(aes_gcm_context_t));
-
-    /* Determine the number of blocks needed for input.
-     * Each block will be processed in increments of 16 bytes.
-     */
-    ctx->num_blocks_input = (int) ceil((float) input_size / 16);
-
-    /* Determine the number of blocks needed for the AAD */
-    ctx->num_blocks_aad = (int) ceil((float) aad_length / 16);
 
     /* Set the bytes processed to 0 */
     ctx->bytes_processed = 0;
@@ -151,22 +137,26 @@ aes_gcm_context_t *aes_gcm_context_init(
 }
 
 /*******************************************************************************
- * Generates the counter block for the GCM context for decryption.
+ * Determines the number of blocks needed for the given input.
  *
  * inputs:
- * - ctx - The context to use for the GCM decryption.
- * - nonce - The nonce to use for the GCM decryption.
- * - non
+ * - input_size - The size of the input.
+ *
  * outputs:
- * - None.
+ * - The number of blocks needed to process the input.
  ******************************************************************************/
+int determine_num_blocks(int input_size) {
+    return (int) ceil((float) input_size / 16);
+}
+
 /*******************************************************************************
- * Generates the ciphertext for the current block of plaintext.
+ * Generates the ciphertext/plaintext for the current block.
  *
  * inputs:
  * - context - The context to use for the GCM encryption.
- * - plaintext - The plaintext to encrypt.
- * - keystream - The keystream to use for the GCM encryption.
+ * - input - The input to encrypt.
+ * - input_length - The length of the input.
+ * - output - The output to write the ciphertext/plaintext to.
  *
  * outputs:
  * - None.
@@ -175,11 +165,12 @@ void aes_gcm_xor_input_with_keystream(
     aes_gcm_context_t *ctx, 
     const unsigned char *input,
     int input_length,
+    unsigned char *keystream_block,
     unsigned char *output
     )
 {
   
-    /* Get the location to place the ciphertext */
+    /* Get the location to place the ciphertext/plaintext */
     unsigned char *output_offset = output + ctx->bytes_processed;
 
     /* Number of bytes to process */
@@ -196,7 +187,7 @@ void aes_gcm_xor_input_with_keystream(
     for (i = 0; i < bytes_to_process; i++)
     {
         /* XOR the plaintext with the keystream */
-        output_offset[i] = input[i] ^ ctx->keystream_block[i];
+        output_offset[i] = input[i] ^ keystream_block[i];
     }
     /* Update the bytes processed */
     ctx->bytes_processed += bytes_to_process;
@@ -212,14 +203,17 @@ void aes_gcm_xor_input_with_keystream(
  * outputs:
  * - None.
  ******************************************************************************/
-void aes_gcm_create_keystream(aes_gcm_context_t *ctx) {
+void aes_gcm_create_keystream(
+    aes_gcm_context_t *ctx,
+    unsigned char *keystream_block
+) {
 
     /* Generate the keystream block */
     aes_encrypt_block(
         ctx->counter_block,
         ctx->key,
         ctx->key_size,
-        ctx->keystream_block
+        keystream_block
     );
 }
 
@@ -335,13 +329,17 @@ void aes_gcm_update_ghash(
     );
 }
 
-void b(aes_gcm_context_t *ctx, const unsigned char *ciphertext, int ciphertext_length) {
+void b(
+    aes_gcm_context_t *ctx, 
+    const unsigned char *ciphertext, int ciphertext_length,
+    int num_blocks_ciphertext, int num_blocks_aad
+    ) {
     /* Initialize GHASH to zero */
     memset(ctx->ghash, 0, 16);
 
     int i;
     /* First process AAD blocks */
-    for (i = 0; i < ctx->num_blocks_aad; i++) {
+    for (i = 0; i < num_blocks_aad; i++) {
 
         /* Pointer to the current block's AAD */
         const unsigned char *current_aad_block = ctx->aad 
@@ -349,7 +347,7 @@ void b(aes_gcm_context_t *ctx, const unsigned char *ciphertext, int ciphertext_l
 
         /* Calculate how many bytes to process */
         int bytes_to_process = 16;
-        if (i == ctx->num_blocks_aad - 1) {
+        if (i == num_blocks_aad - 1) {
             bytes_to_process = ctx->aad_length - (i * 16);
         }
 
@@ -358,14 +356,14 @@ void b(aes_gcm_context_t *ctx, const unsigned char *ciphertext, int ciphertext_l
     }
 
     /* Then process ciphertext blocks */
-    for (i = 0; i < ctx->num_blocks_input; i++) {
+    for (i = 0; i < num_blocks_ciphertext; i++) {
 
         /* Pointer to the current block's ciphertext */
         const unsigned char *current_ciphertext = ciphertext + (i * 16);
 
         /* Calculate how many bytes to process */
         int bytes_to_process = 16;
-        if (i == ctx->num_blocks_input - 1) {
+        if (i == num_blocks_ciphertext - 1) {
             bytes_to_process = ciphertext_length - (i * 16);
         }
 
@@ -385,10 +383,11 @@ void b(aes_gcm_context_t *ctx, const unsigned char *ciphertext, int ciphertext_l
 void aes_gcm_calculate_tag(
     aes_gcm_context_t *ctx, 
     const unsigned char *ciphertext, int ciphertext_length,
+    int num_blocks_ciphertext, int num_blocks_aad,
     unsigned char tag[16]) {
 
     /* Calculate the ghash needed for creating the tag */
-    b(ctx, ciphertext, ciphertext_length);
+    b(ctx, ciphertext, ciphertext_length, num_blocks_ciphertext, num_blocks_aad);
 
     /* XOR the GHash with the nonce */
     int i;
@@ -418,11 +417,6 @@ void debug_print(aes_gcm_context_t *ctx, int round) {
         printf("[DEBUG] E(K,Y0): ");
         for (i = 0; i < 16; i++) printf("%02X", ctx->y0[i]);
         printf("\n");
-
-    /* If the rounds are over */
-    } else if (round == ctx->num_blocks_input) {
-
-        /* Print the entire ciphertext in 16 block chunks */
     
     /* For all other rounds*/
     } else {
@@ -455,12 +449,12 @@ void debug_print(aes_gcm_context_t *ctx, int round) {
  * - key_size - The size of the key.
  * - aad - The additional authentication data.
  * - aad_length - The length of the additional authentication data.
- * - nonce - The nonce to use for the encryption. Must be 12 bytes.
+ * - nonce - The nonce. Must be 12 bytes.
  *
  * outputs:
  * - The ciphertext.
  ******************************************************************************/
-aes_gcm_data_t *aes_encrypt_gcm(
+aes_gcm_data_t *aes_gcm_encrypt(
     const unsigned char *plaintext, 
     int plaintext_size, 
     const unsigned char *key, 
@@ -469,9 +463,15 @@ aes_gcm_data_t *aes_encrypt_gcm(
     int aad_length,
     const unsigned char *nonce) {
 
+    /* Get the number of blocks needed for the plaintext */
+    int num_blocks_plaintext = determine_num_blocks(plaintext_size);
+
+    /* Get the number of blocks needed for the AAD */
+    int num_blocks_aad = determine_num_blocks(aad_length);
+
     /* Initialize the context needed for AES-GCM encryption */
     aes_gcm_context_t *ctx = aes_gcm_context_init(
-        plaintext, plaintext_size, key, key_size, aad, aad_length, nonce
+        key, key_size, aad, aad_length, nonce
     );
 
     /* Allocate memory for the ciphertext */
@@ -481,14 +481,15 @@ aes_gcm_data_t *aes_encrypt_gcm(
 
     /* Iterate through all the blocks */
     int i; 
-    for (i = 0; i < ctx->num_blocks_input; i++)
+    for (i = 0; i < num_blocks_plaintext; i++)
     {
         /* Increment the counter block */
         /* Start at 1 because counter block 0(E(K,Y0)) is reserved for the nonce. */
         aes_gcm_increment_counter_block(ctx);
 
-        /* Generate the keystream block */
-        aes_gcm_create_keystream(ctx);
+        /* Generate the keystream block for this block */
+        unsigned char keystream_block[16];
+        aes_gcm_create_keystream(ctx, keystream_block);
 
         /* XOR the current plaintext block of 16 bytes with the keystream */
         /* Creates the ciphertext for this plaintext block */
@@ -496,6 +497,7 @@ aes_gcm_data_t *aes_encrypt_gcm(
             ctx, 
             plaintext + (i * 16), 
             plaintext_size,
+            keystream_block,
             ciphertext);
 
         /* Debugging if needed */
@@ -509,6 +511,8 @@ aes_gcm_data_t *aes_encrypt_gcm(
     aes_gcm_calculate_tag(ctx, 
         ciphertext, 
         ciphertext_size,
+        num_blocks_plaintext, /* Plaintext is always same size as ciphertext */
+        num_blocks_aad,
         tag
     );
 
@@ -534,41 +538,162 @@ aes_gcm_data_t *aes_encrypt_gcm(
 }
 
 /*******************************************************************************
- * Encrypts the input using AES-GCM.
+ * Encrypts a file using AES-GCM.
  *
  * inputs:
- * - input - The input to encrypt.
- * - input_size - The size of the input.
+ * - plaintext_file - The file to encrypt.
+ * - encrypted_file - The file to write the encrypted data to.
  * - key - The key to use for the encryption.
  * - key_size - The size of the key.
  * - aad - The additional authentication data.
  * - aad_length - The length of the additional authentication data.
+ * - nonce - The nonce. Must be 12 bytes.
  *
  * outputs:
- * - The encrypted data.
+ * - None.
  ******************************************************************************/
-aes_gcm_data_t *aes_encrypt_gcm_bytes(
-    const unsigned char *input,
-    int input_size,
+void aes_gcm_encrypt_file(
+    const char *plaintext_file,
+    const char *encrypted_file,
     const unsigned char *key,
     int key_size,
     const unsigned char *aad,
-    int aad_length) {
+    int aad_length,
+    const unsigned char *nonce) {
 
-    /* Generates a random 12 byte nonce */
-    unsigned char *nonce = aes_gcm_generate_nonce();
+    /* Open the plaintext file */
+    FILE *plaintext_file_ptr = fopen(plaintext_file, "rb");
+    if (plaintext_file_ptr == NULL) {
+        printf("[ERROR] Failed to open plaintext file\n");
+        return;
+    }
+    
+    /* Open the encrypted file */
+    FILE *encrypted_file_ptr = fopen(encrypted_file, "wb");
+    if (encrypted_file_ptr == NULL) {
+        printf("[ERROR] Failed to open encrypted file\n");
+        return;
+    }
+    
+    /* Determine the size of the plaintext file */
+    fseek(plaintext_file_ptr, 0, SEEK_END);
+    int plaintext_size = ftell(plaintext_file_ptr);
+    fseek(plaintext_file_ptr, 0, SEEK_SET);
 
-    /* Encrypt the input */
-    aes_gcm_data_t *output = aes_encrypt_gcm(
-        input, input_size, key, key_size, aad, aad_length, nonce
-    );
+    /* Read the plaintext file into memory */
+    unsigned char *plaintext = (unsigned char *)malloc(plaintext_size);
+    fread(plaintext, 1, plaintext_size, plaintext_file_ptr);
 
-    /* Free the nonce */
-    free(nonce);
+    /* Encrypt the plaintext */
+    aes_gcm_data_t *encrypted_data = aes_gcm_encrypt(
+        plaintext, plaintext_size, key, key_size, aad, aad_length, nonce);
 
-    /* Return the encrypted data */
-    return output;
+    /* Write the authentication tag to the encrypted file */
+    fwrite(encrypted_data->tag, 1, 16, encrypted_file_ptr);
+
+    /* Write the encrypted data to the encrypted file */
+    fwrite(encrypted_data->output, 1, encrypted_data->output_length, encrypted_file_ptr);
+
+    /* Free any memory allocated */
+    free(plaintext);
+    free(encrypted_data);
+
+    /* Close the files */
+    fclose(plaintext_file_ptr);
+    fclose(encrypted_file_ptr);
 }
+
+/*******************************************************************************
+ * Decrypts a file using AES-GCM.
+ *
+ * inputs:
+ * - encrypted_file - The file to decrypt.
+ * - decrypted_file - The file to write the decrypted data to.
+ * - key - The key to use for the decryption.
+ * - key_size - The size of the key.
+ * - aad - The additional authentication data.
+ * - aad_length - The length of the additional authentication data.
+ * - nonce - The nonce. Must be 12 bytes.
+ *
+ * outputs:
+ * - None.
+ ******************************************************************************/
+void aes_gcm_decrypt_file(
+    const char *encrypted_file,
+    const char *decrypted_file,
+    const unsigned char *key,
+    int key_size,
+    const unsigned char *aad,
+    int aad_length,
+    const unsigned char *nonce) {
+
+    /* Open the decrypted file */
+    FILE *decrypted_file_ptr = fopen(decrypted_file, "wb");
+    if (decrypted_file_ptr == NULL) {
+        printf("[ERROR] Failed to open decrypted file\n");
+        return;
+    }
+
+    /* Open the encrypted file */
+    FILE *encrypted_file_ptr = fopen(encrypted_file, "rb");
+    if (encrypted_file_ptr == NULL) {
+        printf("[ERROR] Failed to open encrypted file\n");
+        return;
+    }
+
+    /* Determine the size of the encrypted file */
+    fseek(encrypted_file_ptr, 0, SEEK_END);
+    int encrypted_file_size = ftell(encrypted_file_ptr);
+    fseek(encrypted_file_ptr, 0, SEEK_SET);
+
+    /* Subtract 16 due to the authentication tag */
+    encrypted_file_size -= 16;
+
+    /* Read the authentication tag from the file */
+    unsigned char auth_tag[16];
+    fread(auth_tag, 1, 16, encrypted_file_ptr);
+
+    /* Read the encrypted file into memory */
+    unsigned char *encrypted_data = (unsigned char *)malloc(encrypted_file_size);
+    fread(encrypted_data, 1, encrypted_file_size, encrypted_file_ptr);
+;
+
+    /* Decrypt the encrypted data */
+    aes_gcm_data_t *decrypted_data = aes_gcm_decrypt(
+        encrypted_data, encrypted_file_size, 
+        key, key_size,
+        aad, aad_length,
+        nonce,
+        auth_tag);
+
+    /* Check if the decrypted data is valid */
+    if (decrypted_data == NULL) {
+        printf("[ERROR] Failed to decrypt data\n");
+        return;
+    }
+
+    /* Write the decrypted data to the decrypted file */
+    fwrite(decrypted_data->output, 1, 
+        decrypted_data->output_length, decrypted_file_ptr);
+
+    /* Free any memory allocated */
+    free(encrypted_data);
+    free(decrypted_data);
+
+    /* Close the files */
+    fclose(encrypted_file_ptr);
+    fclose(decrypted_file_ptr);
+}
+
+
+
+
+
+
+    
+    
+
+
 
 
 /*******************************************************************************
@@ -581,13 +706,13 @@ aes_gcm_data_t *aes_encrypt_gcm_bytes(
  * - key_size - The size of the key.
  * - aad - The additional authentication data.
  * - aad_length - The length of the additional authentication data.
- * - nonce - The nonce to use for the decryption.
+ * - nonce - The nonce. Must be 12 bytes.
  * - auth_tag - The 16 byte authentication tag verifying ciphertext integrity.
  *
  * outputs:
  * - The decrypted data.
  ******************************************************************************/
-aes_gcm_data_t *aes_decrypt_gcm(
+aes_gcm_data_t *aes_gcm_decrypt(
     const unsigned char *ciphertext,
     int ciphertext_size,
     const unsigned char *key,
@@ -597,9 +722,14 @@ aes_gcm_data_t *aes_decrypt_gcm(
     const unsigned char *nonce,
     const unsigned char *auth_tag) {
 
+    /* Get the number of blocks needed for the ciphertext */
+    int num_blocks_ciphertext = determine_num_blocks(ciphertext_size);
+
+    /* Get the number of blocks needed for the AAD */
+    int num_blocks_aad = determine_num_blocks(aad_length);
+
     /* Initialize the context needed for AES-GCM decryption */
     aes_gcm_context_t *ctx = aes_gcm_context_init(
-        ciphertext, ciphertext_size, 
         key, key_size, 
         aad, aad_length,
         nonce
@@ -607,7 +737,8 @@ aes_gcm_data_t *aes_decrypt_gcm(
 
     /* Calculate the tag */
     unsigned char tag[16];
-    aes_gcm_calculate_tag(ctx, ciphertext, ciphertext_size, tag);
+    aes_gcm_calculate_tag(ctx, ciphertext, ciphertext_size, 
+        num_blocks_ciphertext, num_blocks_aad, tag);
 
     /* Check if the tag is valid */
     if (memcmp(auth_tag, tag, 16) != 0) {
@@ -631,21 +762,23 @@ aes_gcm_data_t *aes_decrypt_gcm(
         plaintext_size * sizeof(unsigned char));
 
 
-    /* Iterate through all the blocks */
+    /* Iterate through all the blocks of ciphertext */
     int i; 
-    for (i = 0; i < ctx->num_blocks_input; i++)
+    for (i = 0; i < num_blocks_ciphertext; i++)
     {
         /* Increment the counter block */
         aes_gcm_increment_counter_block(ctx);
 
-        /* Generate the keystream block */
-        aes_gcm_create_keystream(ctx);
+        /* Generate the keystream block for this block */
+        unsigned char keystream_block[16];
+        aes_gcm_create_keystream(ctx, keystream_block);
 
         /* XOR the current ciphertext block of 16 bytes with the keystream */
         /* Creates the plaintext for this ciphertext block */
         aes_gcm_xor_input_with_keystream(
             ctx, 
             ciphertext + (i * 16), ciphertext_size,
+            keystream_block,
             plaintext);
 
         /* Debugging if needed */

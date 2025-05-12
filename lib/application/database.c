@@ -4,6 +4,8 @@
 
 #include "application/database.h"
 #include "utils/compression.h"
+#include "utils/hex.h"
+#include "encryption/aes/gcm.h"
 
 /*******************************************************************************
  * Initialize the database.
@@ -54,24 +56,49 @@ hospital_record_t *database_init(const char *hospital_name) {
  ******************************************************************************/
 hospital_record_t *load_database(const char *hospital_name) {
 
+    /* Create encryption key & nonce */
+    unsigned char *key = convert_hex_string_to_bytes(
+        "feffe9928665731c6d6a8f9467308308");
+    unsigned char *nonce = convert_hex_string_to_bytes(
+        "cafebabefacedbaddecaf888");
+    int key_size = 16;
+
     /* Initialize the database */
     hospital_record_t *records = database_init(hospital_name);
 
-    /* Name of database file */
+    /* Name of database file(s) */
     char db_name[256];
-    sprintf(db_name, "%s.db", hospital_name);
+    snprintf(db_name, sizeof(db_name), "%s.db", 
+        records->hospital_name);
+    char db_name_compressed[256];
+    snprintf(db_name_compressed, sizeof(db_name_compressed), "%s_compressed.db", 
+        records->hospital_name);
+    char db_name_encrypted[256];
+    snprintf(db_name_encrypted, sizeof(db_name_encrypted), "%s_encrypted.db", 
+        records->hospital_name);
 
-    /* Decompress the database(if one already exists) */
-    decompress_file("compressed.db", db_name);
+
+    /* If the database does not exist */
+    FILE *encrypted_db = fopen(db_name_encrypted, "rb");
+    if (encrypted_db == NULL) {
+     
+        /* Assume no database exists yet*/
+        return records;
+    }
+
+    /* Encrypt the database */
+    aes_gcm_decrypt_file(
+        db_name_encrypted,
+        db_name_compressed,
+        key, key_size,
+        NULL, 0,
+        nonce);
+
+    /* Decompress the database */
+    decompress_file(db_name_compressed, db_name);
 
     /* Open the database file */
     FILE *db = fopen(db_name, "rb");
-
-    /* If the database file was not opened successfully */
-    if (db == NULL) {
-        /* Assume the database is empty */
-        return records;
-    }
 
     /* -----------------------------------------------------------------------*/
     /* Doctors section */
@@ -184,11 +211,19 @@ hospital_record_t *load_database(const char *hospital_name) {
         }
     }
 
-    /* Close the database file */
+    /* Close the files opened */
     fclose(db);
+    fclose(encrypted_db);
+
+    /* Remove the compressed database file */
+    if (remove(db_name_compressed) != 0) {
+        printf("Error: Failed to delete %s\n", db_name_compressed);
+    }
 
     /* Remove the database file */
-    remove(db_name);
+    if (remove(db_name) != 0) {
+        printf("Error: Failed to delete %s\n", db_name);
+    }
 
     /* Return the list of users */
     return records;
@@ -204,10 +239,23 @@ hospital_record_t *load_database(const char *hospital_name) {
  ******************************************************************************/
 void save_database(hospital_record_t *records) {
 
-    /* Name of database file */
-    /* 3 extra characters added to accommodate the .db extension */
-    char db_name[259];
-    sprintf(db_name, "%s.db", records->hospital_name);
+    /* Create encryption key & nonce */
+    unsigned char *key = convert_hex_string_to_bytes(
+        "feffe9928665731c6d6a8f9467308308");
+    unsigned char *nonce = convert_hex_string_to_bytes(
+        "cafebabefacedbaddecaf888");
+    int key_size = 16;
+
+    /* Name of database file(s) */
+    char db_name[256];
+    snprintf(db_name, sizeof(db_name), "%s.db", 
+        records->hospital_name);
+    char db_name_compressed[256];
+    snprintf(db_name_compressed, sizeof(db_name_compressed), "%s_compressed.db", 
+        records->hospital_name);
+    char db_name_encrypted[256];
+    snprintf(db_name_encrypted, sizeof(db_name_encrypted), "%s_encrypted.db", 
+        records->hospital_name);
 
     /* Open the database file */
     FILE *db = fopen(db_name, "wb");
@@ -296,10 +344,25 @@ void save_database(hospital_record_t *records) {
     fclose(db);
 
     /* Compress the database */
-    compress_file(db_name, "compressed.db");
+    compress_file(db_name, db_name_compressed);
+
+    /* Encrypt the database */
+    aes_gcm_encrypt_file(
+        db_name_compressed,
+        db_name_encrypted,
+        key, key_size,
+        NULL, 0,
+        nonce);
     
-    /* Remove the database file */
-    remove(db_name); 
+    /* Remove all database file(s) except the encrypted database file */
+    if (remove(db_name_compressed) != 0) {
+        printf("Error: Failed to delete %s\n", db_name_compressed);
+    }
+
+    if (remove(db_name) != 0) {
+        printf("Error: Failed to delete %s\n", db_name);
+    }
+
 }
 
 
