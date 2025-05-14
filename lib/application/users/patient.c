@@ -206,6 +206,10 @@ void print_patient_update_menu()
 void update_patient_details(
     hospital_record_t *records, patient_details_t *patient)
 {
+
+    /* Print the update menu */
+    print_patient_update_menu();
+
     /* Get the user's choice */
     /* 3 characters will store any choice + null terminator */
     char choice[3];

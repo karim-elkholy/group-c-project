@@ -9,7 +9,7 @@
  * - character - The character to check.
  * outputs:
  * - 1 if the character is a digit otherwise 0.
- *******************************************************************************/
+ ******************************************************************************/
 int isDigit(char character)
 {
 	/* Checks if a character is a digit between 0 and 9
@@ -25,7 +25,7 @@ int isDigit(char character)
  * - string - The string to validate
  * outputs:
  * - 1 if the string is all digits otherwise 0.
- *******************************************************************************/
+ ******************************************************************************/
 int isAllDigits(const char *string)
 {
 	/* Iterate through the given string */
@@ -51,7 +51,7 @@ int isAllDigits(const char *string)
  * - email - The email to check.
  * outputs:
  * - 1 if the email is valid otherwise 0.
- *******************************************************************************/
+ ******************************************************************************/
 int is_valid_email(const char *email) {
     /* Check if the email is valid */
     if (email == NULL) {
@@ -97,7 +97,7 @@ int is_valid_email(const char *email) {
  * - phone - The phone number to check.
  * outputs:
  * - 1 if the phone number is valid otherwise 0.
- *******************************************************************************/
+ ******************************************************************************/
 int is_valid_phone(const char *phone) {
     /* Check if the phone number is valid */
     if (phone == NULL) {

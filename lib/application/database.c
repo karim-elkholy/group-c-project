@@ -373,7 +373,7 @@ void save_database(hospital_record_t *records) {
  * - records - The hospital records.
  * outputs:
  * - None.
- *******************************************************************************/
+ ******************************************************************************/
 void close_database(hospital_record_t *records) {
 
     /* Free the linked list of patients */
