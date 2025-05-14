@@ -1,3 +1,5 @@
+#ifndef TEST_SHARED_H
+#define TEST_SHARED_H
 
 #include <stdio.h>
 #include <stdlib.h> 
@@ -8,39 +10,38 @@
 #include "application/users/patient.h"
 #include "utils/hash.h"
 #include "utils/scanner.h"
-#include "test_shared.h"
+
 
 /*******************************************************************************
  * Populates the given database with test data.
- * Alternate seed data.
  * 
  * inputs:
  * - records - The database to populate
  * outputs:
  * - None
  ******************************************************************************/
-void test_seed_data_alternate(hospital_record_t *records) {
+void test_seed_data(hospital_record_t *records) {
 
-    /* Doctor Walter White */
+    /* Doctor Homer Simpson */
     doctor_details_t *doctor = (doctor_details_t *)calloc(
         1, sizeof(doctor_details_t)
     );
     strcpy(doctor->username, "1");
-    strcpy(doctor->name, "Walter White");
-    strcpy(doctor->email, "walter.white@example.com");
+    strcpy(doctor->name, "Homer Simpson");
+    strcpy(doctor->email, "homer.simpson@example.com");
     strcpy(doctor->phone, "1234567890");
     doctor->password = hash_string("1");
     strcpy(doctor->specialization, "Cardiology");
     strcpy(doctor->license_number, "1234567890");
     doctor_signup_silent(records, doctor);
 
-    /* Patient Gus Fring */
+    /* Patient Bart Simpson */
     patient_details_t *patient = (patient_details_t *)calloc(
         1, sizeof(patient_details_t)
     );
     strcpy(patient->username, "2");
-    strcpy(patient->name, "Gus Fring");
-    strcpy(patient->email, "gus.fring@example.com");
+    strcpy(patient->name, "Bart Simpson");
+    strcpy(patient->email, "bart.simpson@example.com");
     strcpy(patient->phone, "1234567890");
     patient->password = hash_string("2");
     strcpy(patient->blood_type, "A+");
@@ -49,13 +50,13 @@ void test_seed_data_alternate(hospital_record_t *records) {
     patient->height = 180;
     patient_signup_silent(records, patient);
 
-    /* Patient Hector Salamanca */
+    /* Patient Lisa Simpson */
     patient_details_t *patient2 = (patient_details_t *)calloc(
         1, sizeof(patient_details_t)
     );
     strcpy(patient2->username, "3");
-    strcpy(patient2->name, "Hector Salamanca");
-    strcpy(patient2->email, "hector.salamanca@example.com");
+    strcpy(patient2->name, "Lisa Simpson");
+    strcpy(patient2->email, "lisa.simpson@example.com");
     strcpy(patient2->phone, "1234567890");
     patient2->password = hash_string("3");
     strcpy(patient2->blood_type, "B-");
@@ -66,65 +67,64 @@ void test_seed_data_alternate(hospital_record_t *records) {
 }
 
 /*******************************************************************************
- * Tests the load & save database functions.
+ * Initializes a dummy hospital for testing.
  * 
  * inputs:
  * - None
  * outputs:
- * - None
+ * - records - The dummy hospital
  ******************************************************************************/
-void test_load_save_database() {
+hospital_record_t *init_dummy_hospital() {
 
     /* Hospital name */
-    const char *hospital_name = "Breaking Bad Hospital";
+    const char *hospital_name = "Simpson Hospital";
 
     /* Load the database */
     hospital_record_t *records = load_database(hospital_name);
-    printf("Loaded database\n");
 
     /* Seed the database */
-    test_seed_data_alternate(records);
+    test_seed_data(records);
 
-    /* Save the database */
-    printf("Saving database\n");
-    save_database(records);
-    printf("Saved database\n");
+    /* Return the records */
+    return records;
+}
 
-    /* Load the database again */
-    printf("Loading database\n");
-    hospital_record_t *records_loaded = load_database(hospital_name);
-    printf("Loaded database\n");
-
-    /* Check if Walter is found */
-    doctor_details_t *doctor = find_doctor(records_loaded, "1");
-    if (strcmp(doctor->name, "Walter White") != 0) {
-        printf("Test failed\n");
-        exit(1);
-    }
-
-    /* Check if Gus is found */
-    patient_details_t *patient = find_patient(records_loaded, "2");
-    if (strcmp(patient->name, "Gus Fring") != 0) {
-        printf("Test failed\n");
-        exit(1);
-    }
-
-    /* Check if Hector is found */
-    patient_details_t *patient2 = find_patient(records_loaded, "3");
-    if (strcmp(patient2->name, "Hector Salamanca") != 0) {
-        printf("Test failed\n");
-        exit(1);
-    }
+/*******************************************************************************
+ * Closes & deletes the dummy hospital.
+ * This includes its database.
+ * 
+ * inputs:
+ * - records - The dummy hospital
+ * outputs:
+ * - None
+ ******************************************************************************/
+void close_dummy_hospital(hospital_record_t *records) {
+    
+    /* Store the name of the database */
+    char database_name[256];
+    strcpy(database_name, records->encrypted_database_name);
 
     /* Close the database */
     close_database(records);
-    close_database(records_loaded);
-        
-        
+
+    /* Delete the database */
+    remove(database_name);
 }
 
-int main() {
 
-    test_run_method("load & save database", test_load_save_database);
-    return 0;
+/*******************************************************************************
+ * Runs a test method.
+ * 
+ * inputs:
+ * - test_name - The name of the test
+ * - test_method - The method to run
+ * outputs:
+ * - None
+ ******************************************************************************/
+void test_run_method( const char *test_name, void (*test_method)()) {
+    printf("Running test: %s\n", test_name);
+    test_method();
+    printf("Test passed [+]\n");
 }
+
+#endif

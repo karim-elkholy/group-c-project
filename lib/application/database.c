@@ -20,7 +20,10 @@ hospital_record_t *database_init(const char *hospital_name) {
     /** Create the database */
     hospital_record_t *records = (hospital_record_t *)malloc(
         sizeof(hospital_record_t));
+
+    records->patients = NULL;
     records->num_patients = 0;
+    records->doctors = NULL;
     records->num_doctors = 0;
 
     /* Initialize 10 beds */
@@ -37,6 +40,14 @@ hospital_record_t *database_init(const char *hospital_name) {
     /* Hospital name */
     strcpy(records->hospital_name, hospital_name);
 
+    /* Set the database name */
+    snprintf
+        (records->encrypted_database_name, 
+        sizeof(records->encrypted_database_name), 
+        "%s_encrypted.db", 
+        records->hospital_name
+    );
+
     /* Set the linked lists to NULL since by default no values are present */
     records->doctors = NULL;
     records->patients = NULL;
@@ -44,7 +55,6 @@ hospital_record_t *database_init(const char *hospital_name) {
     /* Return the database */
     return records;
 }
-
 
 /*******************************************************************************
  * Load the database.
@@ -73,22 +83,19 @@ hospital_record_t *load_database(const char *hospital_name) {
     char db_name_compressed[256];
     snprintf(db_name_compressed, sizeof(db_name_compressed), "%s_compressed.db", 
         records->hospital_name);
-    char db_name_encrypted[256];
-    snprintf(db_name_encrypted, sizeof(db_name_encrypted), "%s_encrypted.db", 
-        records->hospital_name);
 
 
     /* If the database does not exist */
-    FILE *encrypted_db = fopen(db_name_encrypted, "rb");
+    FILE *encrypted_db = fopen(records->encrypted_database_name, "rb");
     if (encrypted_db == NULL) {
      
         /* Assume no database exists yet*/
         return records;
     }
 
-    /* Encrypt the database */
+    /* Decrypt the database */
     aes_gcm_decrypt_file(
-        db_name_encrypted,
+        records->encrypted_database_name,
         db_name_compressed,
         key, key_size,
         NULL, 0,
@@ -184,16 +191,10 @@ hospital_record_t *load_database(const char *hospital_name) {
         fread(patient->blood_type, sizeof(char), 3, db);
         /* Medical history */
         fread(patient->medical_history, sizeof(char), 256, db);
-        /* Allergies */
-        fread(patient->allergies, sizeof(char), 256, db);
-        /* Medications */
-        fread(patient->medications, sizeof(char), 256, db);
         /* Weight */
         fread(&patient->weight, sizeof(float), 1, db);
         /* Height */
         fread(&patient->height, sizeof(float), 1, db);
-        /* Notes */
-        fread(patient->notes, sizeof(char), 256, db);
 
 
         /* If this is the first entry of the linked list */
@@ -252,9 +253,6 @@ void save_database(hospital_record_t *records) {
         records->hospital_name);
     char db_name_compressed[256];
     snprintf(db_name_compressed, sizeof(db_name_compressed), "%s_compressed.db", 
-        records->hospital_name);
-    char db_name_encrypted[256];
-    snprintf(db_name_encrypted, sizeof(db_name_encrypted), "%s_encrypted.db", 
         records->hospital_name);
 
     /* Open the database file */
@@ -325,16 +323,10 @@ void save_database(hospital_record_t *records) {
         fwrite(patients->blood_type, sizeof(char), 3, db);
         /* Medical history */
         fwrite(patients->medical_history, sizeof(char), 256, db);
-        /* Allergies */
-        fwrite(patients->allergies, sizeof(char), 256, db);
-        /* Medications */
-        fwrite(patients->medications, sizeof(char), 256, db);
         /* Weight */
         fwrite(&patients->weight, sizeof(float), 1, db);
         /* Height */
         fwrite(&patients->height, sizeof(float), 1, db);
-        /* Notes */
-        fwrite(patients->notes, sizeof(char), 256, db);
 
         /* Move to the next patient */
         patients = patients->next;
@@ -349,7 +341,7 @@ void save_database(hospital_record_t *records) {
     /* Encrypt the database */
     aes_gcm_encrypt_file(
         db_name_compressed,
-        db_name_encrypted,
+        records->encrypted_database_name,
         key, key_size,
         NULL, 0,
         nonce);
@@ -401,5 +393,10 @@ void close_database(hospital_record_t *records) {
         doctors = next;
     }
 
+    /* Free the list of beds */
+    free(records->beds);
+
+    /* Free the records */
     free(records);
 }
+

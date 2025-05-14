@@ -25,16 +25,22 @@ char *read_string(const char *prompt, char *input, int input_size) {
 		exit(1);
 	}
 
-	/* Remove the newline character captured as part of fgets */
-	buffer[strcspn(buffer, "\n")] = '\0';
+	/* If the newline character is not found, the input is too large */
+	if (strchr(buffer, '\n') == NULL) {
 
-	/* If the buffer is too large, exit with an error code */
-	if (strlen(buffer) >= input_size)
-	{
+		/* Clear STDIN */
+		while (getchar() != '\n') {};
+
+		/* Print an error message */
+		printf("Input too large\n");
+
 		/* Return an empty string */
 		input[0] = '\0';
 		return input;
 	}
+
+	/* Remove the newline character captured as part of fgets */
+	buffer[strcspn(buffer, "\n")] = '\0';
 
 	/* Copy the buffer to the input */
 	strcpy(input, buffer);
@@ -72,4 +78,40 @@ char read_choice(const char *prompt)
 
 	/* Return the first character */
 	return choice[0];
+}
+
+/*******************************************************************************
+ * Used to read a float from the user.
+ * 
+ * inputs:
+ * - prompt - The prompt to display to the user
+ * - input - String to store the user's input
+ * - input_size - Size of the string
+ * outputs:
+ * - The user's input
+ ******************************************************************************/
+float read_float(const char *prompt) {
+
+    /* Iterate indefinately */
+    while (1) {
+
+        /* Print the prompt to the user */
+        printf("%s", prompt);
+
+		/* Ask for the float */
+        char user_input[256];
+        read_string(prompt, user_input, sizeof(user_input));
+
+		/* Try to convert the user's input to a float */
+		char *endptr;
+		float output = strtod(user_input, &endptr);
+
+		/* If no character is present in endptr, the float is valid */
+		if (endptr[0] == '\0') {
+			return output;
+		}
+
+		/* Print an error message */
+		printf("Invalid float\n");
+    }
 }

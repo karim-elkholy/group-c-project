@@ -22,21 +22,15 @@ struct patient_details {
 
     /* Blood type */
     char blood_type[3];
-    /* Medical history */
+    /* Medical history(includes allergies and medications) */
     char medical_history[256];
-    /* Allergies */
-    char allergies[256];
-    /* Medications */
-    char medications[256];
-
     /* Weight */
     float weight;
-
+    /* BMI */
+    float bmi;
+    
     /* Height */
     float height;
-
-    /* Extra notes about the patient */
-    char notes[256];
 
     /* Next patient */
     /* Needed for linked list */

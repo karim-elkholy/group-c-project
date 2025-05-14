@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include "application/database.h"
 #include "utils/scanner.h"
 #include "utils/hash.h"
-
+#include "utils/input.h"
 
 /*******************************************************************************
  * Silently adds a new patient to the hospital records.
@@ -47,6 +48,129 @@ void patient_signup_silent(
 }
 
 /*******************************************************************************
+ * Calculates the BMI of a patient.
+ *
+ * inputs:
+ * - weight - The weight of the patient
+ * - height - The height of the patient
+ * outputs:
+ * - The BMI of the patient
+ ******************************************************************************/
+float calculate_bmi(float weight, float height) {
+    return weight / (pow(height, 2));
+}
+
+/*******************************************************************************
+ * Silently adds a new patient to the hospital records.
+ * 
+ * inputs:
+ * - records - The hospital records
+ * - patient - The patient to add
+ * outputs:
+ * - none
+ ******************************************************************************/
+void patient_signup_batch(
+    hospital_record_t *records, 
+    patient_details_t *patient
+) {
+
+    /* If this is the first patient */
+    if ( records->num_patients == 0 ) {
+
+        /* Add the patient to the list */
+        records->patients = patient;
+
+        /* Mark the end of the list */
+        records->patients->next = NULL;
+    
+    /* If this is not the first entry */
+    } else {
+
+        /* Find the last patient*/
+        patient_details_t *last_patient = records->patients;
+        while (last_patient->next != NULL) {
+            last_patient = last_patient->next;
+        }
+
+        /* Add the new patient to the end of the list */
+        last_patient->next = patient;
+    }
+
+    /* Update the number of patients */
+    records->num_patients += 1;
+
+    /* Indicate a patient has been successfully added */
+    printf("Patient %s added successfully\n", patient->username);
+}
+
+/*******************************************************************************
+ * Validates the username.
+ * 
+ * inputs:
+ * - records - The hospital records
+ * - username - The string to store the username .
+ * outputs:
+ * - none
+ ******************************************************************************/
+int patient_validate_username(hospital_record_t *records, char *username) {
+
+    /* If the username is empty */
+    if ( username == NULL || strlen(username) == 0) {
+        printf("Username cannot be empty\n");
+        return 1;
+    }
+
+    /* If the username contains a space */
+    if (strchr(username, ' ') != NULL) {
+        printf("Username cannot contain a space\n");
+        return 1;
+    }
+
+    /* If another patient has this username */
+    if (find_patient(records, username) != NULL) {
+        printf("Patient %s already exists\n", username);
+        printf("Please choose a different username\n");
+        return 1;
+    }
+
+    /* Return 0 if validation passes */
+    return 0;
+}
+
+/*******************************************************************************
+ * Asks for username.
+ * 
+ * inputs:
+ * - records - The hospital records
+ * - username - The string to store the username .
+ * - update - Whether this is an update.
+ * outputs:
+ * - none
+ ******************************************************************************/
+void patient_ask_for_username(
+    hospital_record_t *records,
+    char *username, 
+    int update) {
+
+    /* Iterate indefinately */
+    while (1) {
+
+        /* If this is an update, print the word New*/
+        if (update == 1) {
+            printf("New ");
+        }
+
+        /* Ask for the username */
+        read_string("Username: ", username, sizeof(username));
+
+        /* Exit once the username is valid */
+        if (patient_validate_username(records, username) == 0) {
+            break;
+        }
+    }
+}
+
+/*******************************************************************************
  * Adds a new patient to the hospital records.
  * 
  * inputs:
@@ -63,42 +187,28 @@ patient_details_t *patient_signup(hospital_record_t *records) {
     /* TODO - add form validation */
     /* Ask the user for their details */
     char username[256];
-    read_string("Username: ", username, sizeof(username));
+    patient_ask_for_username(records, username, 0);
     /* Name */
     char name[256];
-    read_string("Name: ", name, sizeof(name));
+    ask_for_name(name, 0);
     /* Email */
     char email[256];
-    read_string("Email: ", email, sizeof(email));
+    ask_for_email(email, 0);
     /* Phone */
     char phone[256];
-    read_string("Phone: ", phone, sizeof(phone));
+    ask_for_phone(phone, 0);
     /* Password */
-    char password[256];
-    read_string("Password: ", password, sizeof(password));
+    unsigned int password = ask_for_password(0);
     /* Blood type */
     char blood_type[256];
-    read_string("Blood type: ", blood_type, sizeof(blood_type));
+    ask_for_blood_type(blood_type, 0);
     /* Medical history */
     char medical_history[256];
-    read_string("Medical history: ", medical_history, sizeof(medical_history));
-    /* Allergies */
-    char allergies[256];
-    read_string("Allergies: ", allergies, sizeof(allergies));
-    /* Medications */
-    char medications[256];
-    read_string("Medications: ", medications, sizeof(medications));
+    ask_for_medical_history(NULL, medical_history);
     /* Weight */
-    char weight[256];
-    read_string("Weight(kg): ", weight, sizeof(weight));
-    float weight_float = atof(weight);
+    float weight_float = ask_for_weight(0);
     /* Height */
-    char height[256];
-    read_string("Height(cm): ", height, sizeof(height));
-    float height_float = atof(height);
-    /* Extra notes about the patient */
-    char notes[256];
-    read_string("Notes: ", notes, sizeof(notes));
+    float height_float = ask_for_height(0);
 
     /* Create a new doctor */
     patient_details_t *patient = malloc(sizeof(patient_details_t));
@@ -111,27 +221,19 @@ patient_details_t *patient_signup(hospital_record_t *records) {
     /* Phone */
     strcpy(patient->phone, phone);
     /* Password */
-    patient->password = hash_string(password);
+    patient->password = password;
     /* Blood type */
     strcpy(patient->blood_type, blood_type);
     /* Medical history */
     strcpy(patient->medical_history, medical_history);
-    /* Allergies */
-    strcpy(patient->allergies, allergies);
-    /* Medications */
-    strcpy(patient->medications, medications);
     /* Weight */
     patient->weight = weight_float;
     /* Height */
     patient->height = height_float;
-    /* Extra notes about the patient */
-    strcpy(patient->notes, notes);
 
     /* Add the patient to the hospital records */
     patient_signup_silent(records, patient);
 
-    /* Print a success message if signup is successful */
-    printf("Signup successful\n");
 
     /* Return the newly created patient */
     return patient;
@@ -187,14 +289,13 @@ void print_patient_update_menu()
            "4. Phone\n"
            "5. Password\n"
            "6. Blood type\n"
-           "7. Medical history\n"
-           "8. Allergies\n"
-           "9. Medications\n"
-           "10. Weight\n"
-           "11. Height\n"
-           "12. Notes\n"
+           "7. Add to Medical history\n"
+           "8. Clear Medical history\n"
+           "9. Weight\n"
+           "10. Height\n"
            "X. Exit\n");
 }
+
 
 /*******************************************************************************
  * Updates a patient's details in the hospital records.
@@ -206,7 +307,6 @@ void print_patient_update_menu()
 void update_patient_details(
     hospital_record_t *records, patient_details_t *patient)
 {
-
     /* Print the update menu */
     print_patient_update_menu();
 
@@ -223,59 +323,35 @@ void update_patient_details(
 
         /* Process the menu choice */
         if (strcmp(choice, "1") == 0) {
+            /* Ask for the new username */
             char username[256];
-            read_string("Enter your new username: ", username, sizeof(username));
+            patient_ask_for_username(records, username, 1);
+            /* Update the username */
             strcpy(patient->username, username);
         } else if (strcmp(choice, "2") == 0) {
-            char name[256];
-            read_string("Enter your new name: ", name, sizeof(name));
-            strcpy(patient->name, name);
+            ask_for_name(patient->name, 1);
         } else if (strcmp(choice, "3") == 0) {
-            char email[256];
-            read_string("Enter your new email: ", email, sizeof(email));
-            strcpy(patient->email, email);
+            ask_for_email(patient->email, 1);
         } else if (strcmp(choice, "4") == 0) {
-            char phone[256];
-            read_string("Enter your new phone: ", phone, sizeof(phone));
-            strcpy(patient->phone, phone);
+            ask_for_phone(patient->phone, 1);
         } else if (strcmp(choice, "5") == 0) {
-            char password[256];
-            read_string("Enter your new password: ", password, sizeof(password));
-            patient->password = hash_string(password);
+            patient->password = ask_for_password(1);
         } else if (strcmp(choice, "6") == 0) {
-            char blood_type[256];
-            read_string("Enter your new blood type: ", 
-                blood_type, sizeof(blood_type));
-            strcpy(patient->blood_type, blood_type);
+            ask_for_blood_type(patient->blood_type, 1);
         } else if (strcmp(choice, "7") == 0) {
-            char medical_history[256];
-            read_string("Enter your new medical history: ", 
-            medical_history, sizeof(medical_history));
-            strcpy(patient->medical_history, medical_history);
+            ask_for_medical_history(patient->medical_history, patient->medical_history);
         } else if (strcmp(choice, "8") == 0) {
-            char allergies[256];
-            read_string("Enter your new allergies: ", 
-                allergies, sizeof(allergies));
-            strcpy(patient->allergies, allergies);
+            patient->medical_history[0] = '\0';
         } else if (strcmp(choice, "9") == 0) {
-            char medications[256];
-            read_string("Enter your new medications: ",
-                medications, sizeof(medications));
-            strcpy(patient->medications, medications);
+            patient->weight = ask_for_weight(1);
+
+            /* Update BMI */
+            patient->bmi = calculate_bmi(patient->weight, patient->height);
         } else if (strcmp(choice, "10") == 0) {
-            float weight;
-            printf("Enter your new weight: ");
-            scanf("%f", &weight);
-            patient->weight = weight;
-        } else if (strcmp(choice, "11") == 0) {
-            float height;
-            printf("Enter your new height: ");
-            scanf("%f", &height);
-            patient->height = height;
-        } else if (strcmp(choice, "12") == 0) {
-            char notes[256];
-            read_string("Enter your new notes: ", notes, sizeof(notes));
-            strcpy(patient->notes, notes);
+            patient->height = ask_for_height(1);
+
+            /* Update BMI */
+            patient->bmi = calculate_bmi(patient->weight, patient->height);
         } else {
             printf("Invalid choice\n");
         }
@@ -370,6 +446,9 @@ void delete_patient(hospital_record_t *records) {
  ******************************************************************************/
 void print_patient_details(patient_details_t *patient) {
 
+    /* TODO - Jordan ASCII ART */
+    printf("--------------------------------\n");
+
     /* Print the patient details */
     printf("Username: %s\n", patient->username);
     printf("Name: %s\n", patient->name);
@@ -377,11 +456,9 @@ void print_patient_details(patient_details_t *patient) {
     printf("Phone: %s\n", patient->phone);
     printf("Blood type: %s\n", patient->blood_type);
     printf("Medical history: %s\n", patient->medical_history);
-    printf("Allergies: %s\n", patient->allergies);  
-    printf("Medications: %s\n", patient->medications);
     printf("Weight: %f\n", patient->weight);
     printf("Height: %f\n", patient->height);
-    printf("Notes: %s\n", patient->notes);
+    printf("BMI: %f\n", patient->bmi);
 }
 
 /*******************************************************************************

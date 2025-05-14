@@ -6,6 +6,7 @@
 #include "application/users/patient.h"
 #include "utils/scanner.h"
 #include "utils/hash.h"
+#include "utils/input.h"
 
 /*******************************************************************************
  * Silently adds a new doctor to the hospital records.
@@ -22,19 +23,17 @@ void doctor_signup_silent(hospital_record_t *records, doctor_details_t *doctor)
     /* If this is the first doctor */
     if (records->num_doctors == 0)
     {
-
         /* Add the doctor to the list */
         records->doctors = doctor;
 
         /* Mark the end of the list */
         records->doctors->next = NULL;
-
-        /* If this is not the first entry */
     }
+    /* If this is not the first entry */
     else
     {
 
-        /* Find the last doctor*/
+        /* Find the last doctor */
         doctor_details_t *last_doctor = records->doctors;
         while (last_doctor->next != NULL)
         {
@@ -47,6 +46,72 @@ void doctor_signup_silent(hospital_record_t *records, doctor_details_t *doctor)
 
     /* Update the number of doctors */
     records->num_doctors += 1;
+}
+/*******************************************************************************
+ * Validates the username.
+ * 
+ * inputs:
+ * - records - The hospital records
+ * - username - The string to store the username .
+ * outputs:
+ * - none
+ ******************************************************************************/
+int doctor_validate_username(hospital_record_t *records, char *username) {
+
+    /* If the username is empty */
+    if ( username == NULL || strlen(username) == 0) {
+        printf("Username cannot be empty\n");
+        return 1;
+    }
+
+    /* If the username contains a space */
+    if (strchr(username, ' ') != NULL) {
+        printf("Username cannot contain a space\n");
+        return 1;
+    }
+    
+    /* If another doctor has this username */
+    if (find_doctor(records, username) != NULL) {
+        printf("Doctor %s already exists\n", username);
+        printf("Please choose a different username\n");
+        return 1;
+    }
+
+    /* Return 0 if validation passes */
+    return 0;
+}
+
+/*******************************************************************************
+ * Asks for username.
+ * 
+ * inputs:
+ * - records - The hospital records
+ * - username - The string to store the username .
+ * - update - Whether this is an update.
+ * outputs:
+ * - none
+ ******************************************************************************/
+void doctor_ask_for_username(
+    hospital_record_t *records,
+    char *username, 
+    int update) {
+
+    /* Iterate indefinately */
+    while (1) {
+
+        /* If this is an update, print the word New*/
+        if (update == 1) {
+            printf("New ");
+        }
+
+        /* Ask for the username */
+        read_string("Username: ", username, sizeof(username));
+
+        /* Exit once the username is valid */
+        if (doctor_validate_username(records, username) == 0) {
+            break;
+        }
+    }
 }
 
 /*******************************************************************************
@@ -66,19 +131,18 @@ void doctor_signup(hospital_record_t *records)
 
     /* Ask the user for their details */
     char username[256];
-    read_string("Enter your username: ", username, sizeof(username));
+    doctor_ask_for_username(records, username, 0);
     /* Name */
     char name[256];
-    read_string("Enter your name: ", name, sizeof(name));
+    ask_for_name(name, 0);
     /* Email */
     char email[256];
-    read_string("Enter your email: ", email, sizeof(email));
+    ask_for_email(email, 0);
     /* Phone */
     char phone[256];
-    read_string("Enter your phone: ", phone, sizeof(phone));
+    ask_for_phone(phone, 0);
     /* Password */
-    char password[256];
-    read_string("Enter your password: ", password, sizeof(password));
+    unsigned int password = ask_for_password(0);
     /* Specialization */
     char specialization[256];
     read_string("Enter your specialization: ",
@@ -96,7 +160,7 @@ void doctor_signup(hospital_record_t *records)
     strcpy(doctor->name, name);
     strcpy(doctor->email, email);
     strcpy(doctor->phone, phone);
-    doctor->password = hash_string(password);
+    doctor->password = password;
     strcpy(doctor->specialization, specialization);
     strcpy(doctor->license_number, license_number);
 
@@ -206,19 +270,16 @@ void update_doctor_details(
 
             /* Ask the user for the new username */
             char username[256];
-            read_string("Enter your new username: ", username,
-                        sizeof(username));
+            doctor_ask_for_username(records, username, 1);
 
             /* Update the doctor's username */
             strcpy(doctor->username, username);
         }
         else if (choice == '2')
         {
-
             /* Ask the user for the new name */
             char name[256];
-            read_string("Enter your new name: ", name,
-                        sizeof(name));
+            ask_for_name(name, 1);
 
             /* Update the doctor's name */
             strcpy(doctor->name, name);
@@ -228,8 +289,7 @@ void update_doctor_details(
 
             /* Ask the user for the new email */
             char email[256];
-            read_string("Enter your new email: ", email,
-                        sizeof(email));
+            ask_for_email(email, 1);
 
             /* Update the doctor's email */
             strcpy(doctor->email, email);
@@ -239,8 +299,7 @@ void update_doctor_details(
 
             /* Ask the user for the new phone */
             char phone[256];
-            read_string("Enter your new phone: ", phone,
-                        sizeof(phone));
+            ask_for_phone(phone, 1);
 
             /* Update the doctor's phone */
             strcpy(doctor->phone, phone);
@@ -249,12 +308,10 @@ void update_doctor_details(
         {
 
             /* Ask the user for the new password */
-            char password[256];
-            read_string("Enter your new password: ", password,
-                        sizeof(password));
+            unsigned int password = ask_for_password(1);
 
             /* Update the doctor's password */
-            doctor->password = hash_string(password);
+            doctor->password = password;
         }
         else if (choice == '6')
         {
@@ -518,7 +575,7 @@ void doctor_use(hospital_record_t *records, doctor_details_t *doctor)
     /* Get the user's choice */
     /* 3 characters will store any choice + null terminator */
     char choice[3];
-    while (strcmp(choice, "X") != 0)
+    while (read_string("Enter your choice: ", choice, sizeof(choice)) != 0)
     {
         /* Exit if requested */
         if (strcmp(choice, "X") == 0)

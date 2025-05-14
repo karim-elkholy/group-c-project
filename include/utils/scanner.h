@@ -26,5 +26,16 @@ char *read_string(const char *prompt, char *input, int input_size);
  ******************************************************************************/
 char read_choice(const char *prompt);
 
+/*******************************************************************************
+ * Used to read a float from the user.
+ * 
+ * inputs:
+ * - prompt - The prompt to display to the user
+ * - input - String to store the user's input
+ * - input_size - Size of the string
+ * outputs:
+ * - The user's input
+ ******************************************************************************/
+float read_float(const char *prompt);
 #endif
 

@@ -18,6 +18,9 @@ struct hospital_record {
     /* Hospital name */
     char hospital_name[256];
 
+    /* Name of the encrypted database */
+    char encrypted_database_name[256];
+
     /* Patients */
     patient_details_t *patients;
     /* Doctors */

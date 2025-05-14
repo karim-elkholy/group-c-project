@@ -139,6 +139,8 @@ void use_doctor_menu(hospital_record_t *records) {
 
     /* Login to the doctor menu if the user provides the correct password */
     if (verify_user_password(doctor->password) == 1) {
+
+        printf("Doctor logged in\n");
         /* Call the doctor menu */
         doctor_use(records, doctor);
     }
