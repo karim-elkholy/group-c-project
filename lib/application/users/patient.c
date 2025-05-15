@@ -57,7 +57,11 @@ void patient_signup_silent(
  * - The BMI of the patient
  ******************************************************************************/
 float calculate_bmi(float weight, float height) {
-    return weight / (pow(height, 2));
+    /* Convert the height to meters */
+    float height_meters = height / 100;
+
+    /* Calculate the BMI */
+    return weight / (pow(height_meters, 2));
 }
 
 /*******************************************************************************
@@ -359,6 +363,9 @@ void update_patient_details(
 
         /* Update the records after every action */
         save_database(records);
+
+        /* Print the menu again */
+        print_patient_update_menu();
     }
 }
 
@@ -521,6 +528,9 @@ void patient_use(hospital_record_t *records, patient_details_t *patient) {
 
         /* Update the records after every action */
         save_database(records);
+
+        /* Print the menu again */
+        print_patient_menu();
     }
 
     /* Goodbye message */

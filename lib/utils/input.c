@@ -113,31 +113,36 @@ int is_valid_blood_type(const char blood_type[256]) {
         return 0;
     }
 
-    /* Convert the blood type to lowercase */
-    char blood_type_lower[256];
-    strcpy(blood_type_lower, blood_type);
+    /* Convert the blood type to uppercase */
+    char blood_type_upper[256];
+    strcpy(blood_type_upper, blood_type);
 
     int i;
     for (i = 0; i < strlen(blood_type); i++) {
 
         /* Set the current character */
-        blood_type_lower[i] = blood_type[i];
+        blood_type_upper[i] = blood_type[i];
 
-        /* If character is uppercase, convert to lowercase */
-        if (blood_type[i] >= 'A' && blood_type[i] <= 'Z') {
-            /* The lowercase equivalent is 32 places ahead in the ASCII table */
-            blood_type_lower[i] = blood_type_lower[i] + 32;
+        /* If character is lowercase, convert to uppercase */
+        if (blood_type[i] >= 'a' && blood_type[i] <= 'z') {
+            /* The uppercase equivalent is 32 places behind in the ASCII table */
+            blood_type_upper[i] = blood_type_upper[i] - 32;
         }
     }
     
     /* Array of valid blood types */
-    char *valid_blood_types[] = {"a", "b", "ab", "o"};
+    char *valid_blood_types[] = {
+        "A+", "A-",
+        "B+", "B-",
+        "AB+", "AB-",
+        "O+", "O-"
+    };
 
     /* Check if the blood type is valid */
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < 8; i++) {
 
         /* Return once the blood type is validated */
-        if (strcmp(blood_type_lower, valid_blood_types[i]) == 0) {
+        if (strcmp(blood_type_upper, valid_blood_types[i]) == 0) {
             return 0;
         }
     }

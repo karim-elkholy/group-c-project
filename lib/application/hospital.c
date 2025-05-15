@@ -103,20 +103,6 @@ void use_patient_menu(hospital_record_t *records) {
  ******************************************************************************/
 void use_doctor_menu(hospital_record_t *records) {
 
-    /* If no doctors exist */
-    if (records->num_doctors == 0) {
-
-        /* Explain why the user needs to sign up as a doctor */
-        printf("First-time Setup: Doctor Registration Required\n");
-        printf("Please signup as a doctor to initialize the system.\n");
-
-        /* Sign up as a doctor */
-        doctor_signup(records);
-
-        /* Redirecting to login menu message*/
-        printf("Redirecting to login menu\n");
-    }
-
     /* Stylish login message*/
     printf("--------------------------------\n");
     printf("Doctor Login \n");
@@ -201,6 +187,28 @@ void use(const char *hospital_name)
 
     /* Load the database */
     hospital_record_t *records = load_database(hospital_name);
+
+    /* If no doctors exist */
+    if (records->num_doctors == 0) {
+
+        /* Explain why the user needs to sign up as a doctor */
+        printf("--------------------------------\n");
+        printf("First-time Setup: Doctor Registration Required\n");
+        printf("Please signup as a doctor to initialize the system.\n");
+        printf("--------------------------------\n");
+
+        /* Sign up as a doctor */
+        doctor_signup(records);
+
+        /* Indicate no doctors can be created without a doctor */
+        printf("--------------------------------\n");
+        printf("PLEASE NOTE:");
+        printf("Future doctors can only be added after logging in as a doctor\n");
+        printf("--------------------------------\n");
+
+        /* Redirecting to starting menu message*/
+        printf("Redirecting to starting menu\n");
+    }
 
     /* Show the available choices */
     print_menu();
