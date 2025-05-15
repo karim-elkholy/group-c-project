@@ -612,6 +612,9 @@ void doctor_use(hospital_record_t *records, doctor_details_t *doctor)
 
         /* Update the records after every action */
         save_database(records);
+
+        /* Print the menu again */
+        print_doctor_menu();
     }
 
     /* Goodbye message */

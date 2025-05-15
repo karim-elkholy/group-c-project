@@ -92,8 +92,9 @@ void decompress_file(const char *input, const char *output) {
 }
 
 
-/* Node for a binary tree */
-struct Node {
+/* Node for a Huffman tree */
+/* Can represent a leaf or an internal node */
+struct HuffmanNode {
 
     /* Data stored in the node */
     unsigned char data;
@@ -111,7 +112,19 @@ struct Node {
 
 };
 
+typedef struct HuffmanNode HuffmanNode_t;
 
+/*
+Huffman tree has two type of nodes.
+1. Leaf nodes. 
+    - Data is the byte. 
+    - Frequency is the number of times the byte occurs in the file.
+    - Have no children so left and right pointers are NULL.
+2. Internal nodes.
+    - Don't use data. It is NULL.
+    - Frequency is the sum of children's frequencies. 
+    - Have at least 1 child(left/right or both).
+*/
 
 /*******************************************************************************
  * Create frequency table.
@@ -159,6 +172,11 @@ void create_frequency_table(const char *input, unsigned int frequency_table[256]
  * - none
  ******************************************************************************/
 void create_huffman_tree(unsigned int frequency_table[256]) {
+
+    /* Store nodes */
+    /* HuffmanNode_t *nodes[256] = {0}; */
+
+    /* Create leaf nodes for each byte that occurs in the file */
 
 }
 

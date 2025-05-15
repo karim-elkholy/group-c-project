@@ -240,6 +240,9 @@ patient_details_t *patient_signup(hospital_record_t *records) {
     /* Add the patient to the hospital records */
     patient_signup_silent(records, patient);
 
+    /* Print a success message */
+    printf("Patient %s added successfully\n", patient->username);
+
     /* Return the newly created patient */
     return patient;
 }
