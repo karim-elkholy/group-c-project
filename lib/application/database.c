@@ -41,12 +41,8 @@ hospital_record_t *database_init(const char *hospital_name) {
     strcpy(records->hospital_name, hospital_name);
 
     /* Set the database name */
-    snprintf
-        (records->encrypted_database_name, 
-        sizeof(records->encrypted_database_name), 
-        "%s_encrypted.db", 
-        records->hospital_name
-    );
+    strcpy(records->encrypted_database_name, hospital_name);
+    strcat(records->encrypted_database_name, "_encrypted.db");
 
     /* Set the linked lists to NULL since by default no values are present */
     records->doctors = NULL;
@@ -78,12 +74,11 @@ hospital_record_t *load_database(const char *hospital_name) {
 
     /* Name of database file(s) */
     char db_name[256];
-    snprintf(db_name, sizeof(db_name), "%s.db", 
-        records->hospital_name);
+    strcpy(db_name, hospital_name);
+    strcat(db_name, "_encrypted.db");
     char db_name_compressed[256];
-    snprintf(db_name_compressed, sizeof(db_name_compressed), "%s_compressed.db", 
-        records->hospital_name);
-
+    strcpy(db_name_compressed, hospital_name);
+    strcat(db_name_compressed, "_compressed.db");
 
     /* If the database does not exist */
     FILE *encrypted_db = fopen(records->encrypted_database_name, "rb");
@@ -102,7 +97,9 @@ hospital_record_t *load_database(const char *hospital_name) {
         nonce);
 
     /* Decompress the database */
-    decompress_file(db_name_compressed, db_name);
+    /* decompress_file(db_name_compressed, db_name); */
+    decompress_huffman(db_name_compressed, db_name); 
+
 
     /* Open the database file */
     FILE *db = fopen(db_name, "rb");
@@ -250,11 +247,12 @@ void save_database(hospital_record_t *records) {
 
     /* Name of database file(s) */
     char db_name[256];
-    snprintf(db_name, sizeof(db_name), "%s.db", 
-        records->hospital_name);
+    strcpy(db_name, records->hospital_name);
+    strcat(db_name, ".db");
+    /* Compressed database name */
     char db_name_compressed[256];
-    snprintf(db_name_compressed, sizeof(db_name_compressed), "%s_compressed.db", 
-        records->hospital_name);
+    strcpy(db_name_compressed, records->hospital_name);
+    strcat(db_name_compressed, "_compressed.db");
 
     /* Open the database file */
     FILE *db = fopen(db_name, "wb");
@@ -339,7 +337,8 @@ void save_database(hospital_record_t *records) {
     fclose(db);
 
     /* Compress the database */
-    compress_file(db_name, db_name_compressed);
+    /* compress_file(db_name, db_name_compressed); */
+    compression_huffman(db_name, db_name_compressed);
 
     /* Encrypt the database */
     aes_gcm_encrypt_file(

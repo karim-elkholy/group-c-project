@@ -97,6 +97,7 @@ void test_load_save_database() {
 
     /* Check if Walter is found */
     doctor_details_t *doctor = find_doctor(records_loaded, "1");
+    printf("Doctor found: %s\n", doctor->name);
     if (strcmp(doctor->name, "Walter White") != 0) {
         printf("Test failed\n");
         exit(1);
