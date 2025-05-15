@@ -90,3 +90,17 @@ void decompress_file(const char *input, const char *output) {
     fclose(fin);
     fclose(fout);
 }
+
+/*******************************************************************************
+ * Compresses a file using RLE.
+ *
+ * inputs:
+ * - input: name of the file to compress
+ * - output: name of the file to write compressed data to
+ * outputs:
+ * - none
+ *******************************************************************************/
+void compress_file(const char *input, const char *output) {
+ 
+}
+

@@ -486,7 +486,7 @@ void print_patient_menu() {
 
     printf("1. View records\n"
            "2. Update details\n"
-           "3. Exit\n");
+           "X. Exit\n");
 }
 
 /*******************************************************************************
