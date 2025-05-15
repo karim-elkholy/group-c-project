@@ -195,7 +195,8 @@ hospital_record_t *load_database(const char *hospital_name) {
         fread(&patient->weight, sizeof(float), 1, db);
         /* Height */
         fread(&patient->height, sizeof(float), 1, db);
-
+        /* BMI */
+        fread(&patient->bmi, sizeof(float), 1, db);
 
         /* If this is the first entry of the linked list */
         if ( records->patients == NULL ) {
@@ -327,6 +328,8 @@ void save_database(hospital_record_t *records) {
         fwrite(&patients->weight, sizeof(float), 1, db);
         /* Height */
         fwrite(&patients->height, sizeof(float), 1, db);
+        /* BMI */
+        fwrite(&patients->bmi, sizeof(float), 1, db);
 
         /* Move to the next patient */
         patients = patients->next;

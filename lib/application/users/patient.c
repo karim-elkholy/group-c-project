@@ -457,8 +457,8 @@ void print_patient_details(patient_details_t *patient) {
     printf("Phone: %s\n", patient->phone);
     printf("Blood type: %s\n", patient->blood_type);
     printf("Medical history: %s\n", patient->medical_history);
-    printf("Weight: %f\n", patient->weight);
-    printf("Height: %f\n", patient->height);
+    printf("Weight: %.2fkg\n", patient->weight);
+    printf("Height: %.2fcm\n", patient->height);
     printf("BMI: %f\n", patient->bmi);
 }
 
