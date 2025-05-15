@@ -91,6 +91,28 @@ void decompress_file(const char *input, const char *output) {
     fclose(fout);
 }
 
+
+/* Node for a binary tree */
+struct Node {
+
+    /* Data stored in the node */
+    unsigned char data;
+
+    /* Left child of the node */
+    struct Node *left;
+
+    /* Right child of the node */
+    struct Node *right;
+
+    /* Frequency of the node */
+    /* For leaf nodes: Number of times the byte occurs in the file */
+    /* For internal nodes: Sum of children's frequencies */
+    unsigned int frequency;
+
+};
+
+
+
 /*******************************************************************************
  * Create frequency table.
  * The frequency table is an array that tracks the occurrences of each byte.

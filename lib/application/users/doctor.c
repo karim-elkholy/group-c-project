@@ -513,14 +513,15 @@ void view_all_beds(hospital_record_t *records) {
     int i;
     for (i = 0; i < records->num_beds; i++) {
 
-        /* Indicate if the bed is empty */
+        /* If the bed is empty, print that it is empty */
         if (records->beds[i].patient == NULL) {
             printf("Bed %d: Empty\n", i + 1);
+            
+        /* If the bed is not empty, print the patient's details */
+        } else {
+            printf("Bed %d: ", i + 1);
+            print_patient_details(records->beds[i].patient);
         }
-
-        /* Print the patient's details if the bed is not empty */
-        printf("Bed %d: ", i + 1);
-        print_patient_details(records->beds[i].patient);
     }
 }
 
