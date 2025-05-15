@@ -141,12 +141,22 @@ void use_doctor_menu(hospital_record_t *records) {
  * outputs:
  * - none
  ******************************************************************************/
-void print_menu() {
+void print_menu(hospital_record_t *records) {
+
+    /* Header */
+    printf("--------------------------------\n");
+    printf("%s Management System\n", records->hospital_name);
+    printf("--------------------------------\n");
+
+    /* Print the menu */
     printf("A. Signup as Patient\n");
     printf("P. Login as Patient\n");
     printf("D. Login as Doctor\n");
     printf("M. Print this menu again\n");
     printf("X. Exit\n");
+
+    /* Footer */
+    printf("--------------------------------\n");
 }
 
 /*******************************************************************************
@@ -211,7 +221,7 @@ void use(const char *hospital_name)
     }
 
     /* Show the available choices */
-    print_menu();
+    print_menu(records);
 
 	/* Get the user's choice */
 	char choice;
@@ -238,7 +248,7 @@ void use(const char *hospital_name)
         save_database(records);
 
         /* Print the menu again */
-        print_menu();
+        print_menu(records);
 
 	}
 
