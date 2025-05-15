@@ -342,7 +342,7 @@ unsigned int ask_for_password( int update) {
     strcat(password_prompt, "- Contain at least one lowercase letter\n");
     strcat(password_prompt, "- Contain at least one digit\n");
     strcat(password_prompt, "- Contain at least one special character(!@#$)\n");
-    strcat(password_prompt, "Enter your password: ");
+    strcat(password_prompt, "Password: ");
 
     /* Iterate indefinately */
     char temp_password[256];

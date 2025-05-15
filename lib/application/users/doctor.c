@@ -145,12 +145,12 @@ void doctor_signup(hospital_record_t *records)
     unsigned int password = ask_for_password(0);
     /* Specialization */
     char specialization[256];
-    read_string("Enter your specialization: ",
+    read_string("Specialization: ",
                 specialization,
                 sizeof(specialization));
     /* License number */
     char license_number[256];
-    read_string("Enter your license number: ", license_number,
+    read_string("License number: ", license_number,
                 sizeof(license_number));
 
     /* Create a new doctor */
