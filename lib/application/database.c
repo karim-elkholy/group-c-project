@@ -97,7 +97,6 @@ hospital_record_t *load_database(const char *hospital_name) {
         nonce);
 
     /* Decompress the database */
-    /* decompress_file(db_name_compressed, db_name); */
     decompress_huffman(db_name_compressed, db_name); 
 
 
@@ -337,7 +336,6 @@ void save_database(hospital_record_t *records) {
     fclose(db);
 
     /* Compress the database */
-    /* compress_file(db_name, db_name_compressed); */
     compression_huffman(db_name, db_name_compressed);
 
     /* Encrypt the database */

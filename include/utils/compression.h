@@ -1,21 +1,6 @@
 #ifndef COMPRESSION_H
 #define COMPRESSION_H
 
-/* Compresses a file using Run-Length Encoding (RLE).
-* Parameters:
-* - input:  path to the input file to compress
- - output: path to the output compressed file
-*/
-void compress_file(const char *input, const char *output);
-
-/* Decompresses a file that was compressed using RLE.
-* Parameters:
-* - input:  path to the compressed input file
-* - output: path to the output decompressed file
-*/
-void decompress_file(const char *input, const char *output);
-
-
 /* Node for a Huffman tree */
 /* Can represent a leaf or an internal node */
 struct HuffmanNode {
@@ -37,29 +22,6 @@ struct HuffmanNode {
 };
 
 typedef struct HuffmanNode HuffmanNode_t;
-
-/* Huffman code for a byte */
-struct HuffmanCode {
-
-    /* Path of the byte in the tree*/
-    unsigned int path;
-
-    /* How many bits used in the path */
-    unsigned char path_length;
-};
-
-typedef struct HuffmanCode HuffmanCode_t;
-
-
-struct HuffmanHeader {
-    /* Number of bytes in the compressed bitstream */
-    unsigned int num_bytes;
-
-    /* Number of leftover bits in the last byte */
-    unsigned char leftover_bits;
-};
-
-typedef struct HuffmanHeader HuffmanHeader_t;
 
 /*******************************************************************************
  * Compresses a file using Huffman coding.

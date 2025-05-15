@@ -114,31 +114,6 @@ void sort_nodes(HuffmanNode_t *nodes[], int node_count) {
     }
 }
 
-void print_huffman_tree(HuffmanNode_t *node, int depth) {
-    if (node == NULL) return;
-
-    /* Indentation for depth */
-    int i;
-    for (i = 0; i < depth; i++) {
-        printf("    "); /* 4 spaces per level */
-    }
-
-    /* Print the current node */
-    if (node->left == NULL && node->right == NULL) {
-        /* Leaf node */
-        if (node->data >= 32 && node->data <= 126)
-            printf("Leaf: '%c' (freq: %d)\n", node->data, node->frequency);
-        else
-            printf("Leaf: 0x%02X (freq: %d)\n", node->data, node->frequency);
-    } else {
-        /* Internal node */
-        printf("%d.Internal (freq: %d)\n", depth + 1, node->frequency);
-    }
-
-    /* Traverse children */
-    print_huffman_tree(node->left, depth + 1);
-    print_huffman_tree(node->right, depth + 1);
-}
 /*******************************************************************************
  * Create Huffman tree.
  *
@@ -291,90 +266,6 @@ void generate_huffman_codes(HuffmanNode_t *node, char *code, int depth, char *co
     }
 }
 
-/*******************************************************************************
-* Reads the tree from the compressed file.
-*
-* inputs:
-* - compressed_file: The file to read compressed data from
-* - node: The Huffman node to read from the compressed file
-* outputs:
-* - none
-*******************************************************************************/
-void read_tree_from_file(FILE *compressed_file, HuffmanNode_t *node) {
-
-    /* Read the marker to determine whether the node is a leaf node or an internal node */
-    int marker;
-    fread(&marker, sizeof(int), 1, compressed_file);
-
-    /* If the node is a leaf node */
-    if (marker == 1) {
-        /* Read the byte & frequency */
-        fread(&node->data, sizeof(unsigned char), 1, compressed_file);
-        fread(&node->frequency, sizeof(unsigned int), 1, compressed_file);
-
-        /* Leaf nodes have no children */
-        node->left = NULL;
-        node->right = NULL;
-
-    /* If the node is an internal node */
-    } else {
-
-        /* Read the left child */
-        node->left = (HuffmanNode_t *) malloc(sizeof(HuffmanNode_t));
-        read_tree_from_file(compressed_file, node->left);
-
-        /* Read the right child */
-        node->right = (HuffmanNode_t *) malloc(sizeof(HuffmanNode_t));
-        read_tree_from_file(compressed_file, node->right);
-
-        /* Calculate the frequency */
-        node->frequency = node->left->frequency + node->right->frequency;
-    }
-}
-
-/*******************************************************************************
-* Writes the tree to the compressed file.
-*
-* inputs:
-* - compressed_file: The file to write compressed data to
-* - node: The Huffman node to write to the compressed file
-* outputs:
-* - none
-*******************************************************************************/
-void write_tree_to_file(FILE *compressed_file, HuffmanNode_t *node) {
-
-    /* Do nothing if the node is NULL */
-    if (node == NULL) {
-        return;
-    }
-    
-    /* Marks whether the node is a leaf node or an internal node */
-    int marker;
-
-    /* If the node is a leaf node */
-    if (node->left == NULL && node->right == NULL) {
-        /* Mark leaf nodes with 1 */
-        marker = 1;
-        fwrite(&marker, sizeof(int), 1, compressed_file);
-
-        /* Write the byte & frequency to the compressed file */
-        fwrite(&node->data, sizeof(unsigned char), 1, compressed_file);
-        fwrite(&node->frequency, sizeof(unsigned int), 1, compressed_file);
-
-    /* If the node is an internal node */
-    } else {
-        /* Mark internal node with 0 */
-        marker = 0;
-        fwrite(&marker, sizeof(int), 1, compressed_file);
-
-        /* Write the left child to the compressed file */
-        write_tree_to_file(compressed_file, node->left);
-
-        /* Write the right child to the compressed file */
-        write_tree_to_file(compressed_file, node->right);
-    }
-}
-
 
 /*******************************************************************************
  * Writes the compressed data to the file.
@@ -386,76 +277,7 @@ void write_tree_to_file(FILE *compressed_file, HuffmanNode_t *node) {
  * outputs:
  * - none
  ******************************************************************************/
-void write_compressed_data(FILE *input_file, FILE *output_file, HuffmanCode_t *codes) {
-
-
-    /* Buffer for writing bits */
-    /* Waits until 8 bits(1 byte) is collected before writing to file */
-    unsigned char buffer = 0;
-
-    /* Keeps track of the number of bits in the buffer */
-    int bit_count = 0;
-
-    /* Loop until there are no more bytes to read */
-    unsigned char byte;
-    while (fread(&byte, sizeof(unsigned char), 1, input_file) == 1) {
-
-        /* Get the Huffman code for the byte */
-        HuffmanCode_t code = codes[byte];
-        
-        /* Add the Huffman code to the buffer */
-        int i;
-        for (i = 0; i < code.path_length; i++) {
-
-            /* Use the bits as the path in MSB-order */
-            unsigned char bit = get_bit_msb(code.path, i);
-
-            /* Add bit to buffer */
-            buffer = append_bit(buffer, bit);
-
-            /* Increment the bit count */
-            bit_count += 1;
-
-            /* When buffer is full, write it to file */
-            if (bit_count == 8) {
-
-                /* Write the full byte to the file */
-                fwrite(&buffer, sizeof(unsigned char), 1, output_file);
-                
-                /* Reset the buffer */
-                /* Binary form of 0 is 00000000 */
-                buffer = 0;
-
-                /* Reset the bit count */
-                bit_count = 0;
-            }
-        }
-    }
-
-    /* Write any remaining bits in the buffer */
-    if (bit_count > 0) {
-
-        /* Calculate the bits not used in the buffer */
-        int free_space = 8 - bit_count;
-
-        /* Pad the buffer with 0 */
-        int i;
-        for ( i = 0; i < free_space; i++ ) {
-            /* Append 0 */
-            buffer = append_bit(buffer, 0);
-        }
-        
-        /* Write the last buffer to the file */
-        fwrite(&buffer, sizeof(unsigned char), 1, output_file);
-    }
-
-    /* Write the number of leftover bits */
-    /* Needed so decompression knows how many bits to read */
-    fwrite(&bit_count, sizeof(int), 1, output_file);
-}
-
-
-void write_compressed_data_new(FILE *input_file, FILE *output_file, char *codes[256]) {
+void write_compressed_data(FILE *input_file, FILE *output_file, char *codes[256]) {
 
     /* Buffer for writing bits */
     /* Waits until 8 bits(1 byte) is collected before writing to file */
@@ -542,70 +364,8 @@ void write_compressed_data_new(FILE *input_file, FILE *output_file, char *codes[
  * - root: The root of the Huffman tree.
  * outputs:
  * - none
- */
+ ******************************************************************************/
 void read_compressed_data(FILE *input_file, FILE *output_file, HuffmanNode_t *root) {
-
-    /* If root is null */
-    if (root == NULL) {
-        printf("Error: Huffman tree root is null\n");
-        return;
-    }
-
-    /* Current node in the Huffman tree */
-    HuffmanNode_t *current_node = root;
-
-    /* Stores the position for the start of the compressed data */
-    int start_position = ftell(input_file);
-
-    /* Move to end of file to determine file size */
-    fseek(input_file, 0, SEEK_END);
-    int file_size = ftell(input_file);
-    
-    /* Read the leftover bits count from the end of file */
-    int leftover_bits;
-    fseek(input_file, file_size - sizeof(int), SEEK_SET);
-    fread(&leftover_bits, sizeof(int), 1, input_file);
-
-    /* Calculate compressed data size excluding leftover bits int at end */
-    int compressed_data_size = file_size - start_position - sizeof(int);
-
-    /* Move back to start of compressed data */
-    fseek(input_file, start_position, SEEK_SET);
-
-    /* Read the compressed data */
-    int i;
-    for (i = 0; i < compressed_data_size; i++) {
-
-        /* Read the next byte */
-        unsigned char byte;
-        fread(&byte, sizeof(unsigned char), 1, input_file);
-        
-        /* For the last byte, only process the leftover bits */
-        int bits_to_process = (i == compressed_data_size - 1) ? leftover_bits : 8;
-        
-        /* Process each bit in the byte */
-        int j;
-        for (j = 0; j < bits_to_process; j++) {
-
-            /* Get the current bit (starting from leftmost bit) */
-            unsigned char bit = get_bit_msb(byte, j);
-
-            /* If the bit is 0, go left otherwise go right */
-            current_node = (bit == 0) ? current_node->left : current_node->right;
-
-            /* If the current node is a leaf node */
-            if (current_node->left == NULL && current_node->right == NULL) {
-                /* Write the byte to the output file */
-                fwrite(&current_node->data, sizeof(unsigned char), 1, output_file);
-
-                /* Reset the current node to the root */
-                current_node = root;
-            }
-        }
-    }
-}
-
-void read_compressed_data_new(FILE *input_file, FILE *output_file, HuffmanNode_t *root) {
 
     /* Current node in the Huffman tree */
     HuffmanNode_t *current_node = root;
@@ -694,7 +454,7 @@ void compression_huffman(const char *uncompressed_file, const char *compressed_f
     }
 
     /* Write the compressed data to the compressed file */
-    write_compressed_data_new(uncompressed_file_pointer, compressed_file_pointer, codes);
+    write_compressed_data(uncompressed_file_pointer, compressed_file_pointer, codes);
 
     /* Close the file pointers & clean up memory */
     fclose(compressed_file_pointer);
@@ -736,7 +496,7 @@ void decompress_huffman(const char *compressed_file, const char *uncompressed_fi
     }    
 
     /* Read the compressed data from the compressed file */
-    read_compressed_data_new(compressed_file_pointer, uncompressed_file_pointer, huffman_tree);
+    read_compressed_data(compressed_file_pointer, uncompressed_file_pointer, huffman_tree);
     
     /* Close the file pointers*/
     fclose(compressed_file_pointer);
