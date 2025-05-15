@@ -92,15 +92,29 @@ void decompress_file(const char *input, const char *output) {
 }
 
 /*******************************************************************************
- * Compresses a file using RLE.
+ * Compresses a file using Huffman coding.
  *
  * inputs:
- * - input: name of the file to compress
- * - output: name of the file to write compressed data to
+ * - uncompressed_file: The file to compress
+ * - compressed_file: The file to write compressed data to
  * outputs:
  * - none
  *******************************************************************************/
-void compress_file(const char *input, const char *output) {
- 
-}
+void compressionHuffman(const char *uncompressed_file, const char *compressed_file) {
 
+    /* Open the input file */
+    FILE *fin = fopen(uncompressed_file, "rb");
+    if (!fin) {
+        printf("Error opening input file: %s\n", uncompressed_file);
+        return;
+    }
+
+    /* Open the output file */
+    FILE *fout = fopen(compressed_file, "wb");
+    if (!fout) {
+        printf("Error opening output file: %s\n", compressed_file);
+        fclose(fin);
+        return;
+    }
+
+}

@@ -685,17 +685,6 @@ void aes_gcm_decrypt_file(
     fclose(decrypted_file_ptr);
 }
 
-
-
-
-
-
-    
-    
-
-
-
-
 /*******************************************************************************
  * Decrypts the input using AES-GCM.
  *
