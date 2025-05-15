@@ -24,6 +24,7 @@ file(GLOB_RECURSE SOURCES
 )
 
 # Enables debug mode for the given target(library or executable)
+# Enables debug mode for the given target(library or executable)
 function(enable_debug target_name)
     target_compile_options(${target_name} PRIVATE -g)
     target_compile_definitions(${target_name} PRIVATE DEBUG DEBUG_LEVEL=2)
@@ -51,15 +52,9 @@ function(create_tests)
 
     # For each test source file
     foreach(TEST_SOURCE ${TEST_SOURCES})
-
-        # Get the nAM absolute path of the test source file
-        # get_filename_component(TEST_PATH ${TEST_SOURCE} ABSOLUTE)
         
         # Get the name of the test file
         get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
-
-        message(STATUS "TEST_NAME: ${TEST_NAME}")
-        message(STATUS "TEST_PATH: ${TEST_SOURCE}")
 
         # Create a executable for the given test file
         add_executable(
@@ -86,7 +81,6 @@ function(create_tests)
     endforeach()
 
 endfunction()
-
 
 # Release version 
 # Library

@@ -210,7 +210,7 @@ patient_details_t *patient_signup(hospital_record_t *records) {
     /* Height */
     float height_float = ask_for_height(0);
 
-    /* Create a new doctor */
+    /* Create a new patient */
     patient_details_t *patient = malloc(sizeof(patient_details_t));
     /* Username */
     strcpy(patient->username, username);
@@ -230,10 +230,11 @@ patient_details_t *patient_signup(hospital_record_t *records) {
     patient->weight = weight_float;
     /* Height */
     patient->height = height_float;
+    /* BMI */
+    patient->bmi = calculate_bmi(patient->weight, patient->height);
 
     /* Add the patient to the hospital records */
     patient_signup_silent(records, patient);
-
 
     /* Return the newly created patient */
     return patient;

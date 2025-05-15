@@ -105,7 +105,7 @@ int is_valid_phone(const char *phone) {
  * inputs:
  * - blood_type - The blood type to check.
  * outputs:
- * - 1 if the blood type is valid otherwise 0.
+ * - 0 if the blood type is valid otherwise 1.
  ******************************************************************************/
 int is_valid_blood_type(const char blood_type[256]) {
     /* Check if the blood type is valid */
@@ -115,6 +115,8 @@ int is_valid_blood_type(const char blood_type[256]) {
 
     /* Convert the blood type to lowercase */
     char blood_type_lower[256];
+    strcpy(blood_type_lower, blood_type);
+
     int i;
     for (i = 0; i < strlen(blood_type); i++) {
 
@@ -133,13 +135,15 @@ int is_valid_blood_type(const char blood_type[256]) {
 
     /* Check if the blood type is valid */
     for (i = 0; i < 4; i++) {
+
+        /* Return once the blood type is validated */
         if (strcmp(blood_type_lower, valid_blood_types[i]) == 0) {
-            return 1;
+            return 0;
         }
     }
 
-    /* Return 0 if the blood type is not valid */
-    return 0;
+    /* Return 1 if the blood type is not valid */
+    return 1;
 }
 
 
@@ -381,6 +385,9 @@ void ask_for_blood_type(
         if (is_valid_blood_type(blood_type) == 0) {
             break;
         }
+
+        /* Indicate an invalid blood type given */
+        printf("Invalid blood type\n");
     }
 }
 
@@ -458,7 +465,16 @@ void ask_for_medical_history(const char *existing_medical_history, char *new_med
     char temp_medical_history[256];
     read_string(prompt, temp_medical_history, sizeof(temp_medical_history));
 
-    /* Create the new medical history */
-    strcpy(new_medical_history, existing_medical_history);
+    /* Set a null terminator to the first byte to avoid errors */
+    new_medical_history[0] = '\0';
+
+    /* If this is an update to the medical history */
+    if (existing_medical_history != NULL && strlen(existing_medical_history) > 0) {
+        /* Copy the existing medical history */
+        strcat(new_medical_history, existing_medical_history);
+        strcat(new_medical_history, "\n");
+    }
+
+    /* Add the new medical history */
     strcat(new_medical_history, temp_medical_history);
 }

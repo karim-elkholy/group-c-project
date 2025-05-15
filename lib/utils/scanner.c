@@ -95,9 +95,6 @@ float read_float(const char *prompt) {
     /* Iterate indefinately */
     while (1) {
 
-        /* Print the prompt to the user */
-        printf("%s", prompt);
-
 		/* Ask for the float */
         char user_input[256];
         read_string(prompt, user_input, sizeof(user_input));
