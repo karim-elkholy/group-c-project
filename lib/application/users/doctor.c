@@ -19,7 +19,6 @@
  ******************************************************************************/
 void doctor_signup_silent(hospital_record_t *records, doctor_details_t *doctor)
 {
-
     /* If this is the first doctor */
     if (records->num_doctors == 0)
     {

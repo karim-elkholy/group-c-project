@@ -5,7 +5,8 @@
 #include "application/database.h"
 #include "utils/compression.h"
 #include "utils/hex.h"
-#include "encryption/aes/gcm.h"
+#include "encryption/encryption.h"
+#include "compression/compression.h"
 
 /*******************************************************************************
  * Initialize the database.
@@ -97,8 +98,7 @@ hospital_record_t *load_database(const char *hospital_name) {
         nonce);
 
     /* Decompress the database */
-    decompress_huffman(db_name_compressed, db_name); 
-
+    huffman_decompress(db_name_compressed, db_name); 
 
     /* Open the database file */
     FILE *db = fopen(db_name, "rb");
@@ -336,7 +336,7 @@ void save_database(hospital_record_t *records) {
     fclose(db);
 
     /* Compress the database */
-    compression_huffman(db_name, db_name_compressed);
+    huffman_compress(db_name, db_name_compressed);
 
     /* Encrypt the database */
     aes_gcm_encrypt_file(

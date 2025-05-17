@@ -8,6 +8,7 @@
 #include "encryption/aes/keyschedule.h"
 #include "encryption/aes/operations.h"
 #include "encryption/aes/gcm.h"
+#include "encryption/encryption.h"
 
 
 /* Context needed during GCM encryption */
@@ -603,87 +604,6 @@ void aes_gcm_encrypt_file(
     fclose(encrypted_file_ptr);
 }
 
-/*******************************************************************************
- * Decrypts a file using AES-GCM.
- *
- * inputs:
- * - encrypted_file - The file to decrypt.
- * - decrypted_file - The file to write the decrypted data to.
- * - key - The key to use for the decryption.
- * - key_size - The size of the key.
- * - aad - The additional authentication data.
- * - aad_length - The length of the additional authentication data.
- * - nonce - The nonce. Must be 12 bytes.
- *
- * outputs:
- * - None.
- ******************************************************************************/
-void aes_gcm_decrypt_file(
-    const char *encrypted_file,
-    const char *decrypted_file,
-    const unsigned char *key,
-    int key_size,
-    const unsigned char *aad,
-    int aad_length,
-    const unsigned char *nonce) {
-
-    /* Open the decrypted file */
-    FILE *decrypted_file_ptr = fopen(decrypted_file, "wb");
-    if (decrypted_file_ptr == NULL) {
-        printf("[ERROR] Failed to open decrypted file\n");
-        return;
-    }
-
-    /* Open the encrypted file */
-    FILE *encrypted_file_ptr = fopen(encrypted_file, "rb");
-    if (encrypted_file_ptr == NULL) {
-        printf("[ERROR] Failed to open encrypted file\n");
-        return;
-    }
-
-    /* Determine the size of the encrypted file */
-    fseek(encrypted_file_ptr, 0, SEEK_END);
-    int encrypted_file_size = ftell(encrypted_file_ptr);
-    fseek(encrypted_file_ptr, 0, SEEK_SET);
-
-    /* Subtract 16 due to the authentication tag */
-    encrypted_file_size -= 16;
-
-    /* Read the authentication tag from the file */
-    unsigned char auth_tag[16];
-    fread(auth_tag, 1, 16, encrypted_file_ptr);
-
-    /* Read the encrypted file into memory */
-    unsigned char *encrypted_data = (unsigned char *)malloc(encrypted_file_size);
-    fread(encrypted_data, 1, encrypted_file_size, encrypted_file_ptr);
-;
-
-    /* Decrypt the encrypted data */
-    aes_gcm_data_t *decrypted_data = aes_gcm_decrypt(
-        encrypted_data, encrypted_file_size, 
-        key, key_size,
-        aad, aad_length,
-        nonce,
-        auth_tag);
-
-    /* Check if the decrypted data is valid */
-    if (decrypted_data == NULL) {
-        printf("[ERROR] Failed to decrypt data\n");
-        return;
-    }
-
-    /* Write the decrypted data to the decrypted file */
-    fwrite(decrypted_data->output, 1, 
-        decrypted_data->output_length, decrypted_file_ptr);
-
-    /* Free any memory allocated */
-    free(encrypted_data);
-    free(decrypted_data);
-
-    /* Close the files */
-    fclose(encrypted_file_ptr);
-    fclose(decrypted_file_ptr);
-}
 
 /*******************************************************************************
  * Decrypts the input using AES-GCM.
@@ -789,4 +709,84 @@ aes_gcm_data_t *aes_gcm_decrypt(
     return output;
 }
 
+/*******************************************************************************
+ * Decrypts a file using AES-GCM.
+ *
+ * inputs:
+ * - encrypted_file - The file to decrypt.
+ * - decrypted_file - The file to write the decrypted data to.
+ * - key - The key to use for the decryption.
+ * - key_size - The size of the key.
+ * - aad - The additional authentication data.
+ * - aad_length - The length of the additional authentication data.
+ * - nonce - The nonce. Must be 12 bytes.
+ *
+ * outputs:
+ * - None.
+ ******************************************************************************/
+void aes_gcm_decrypt_file(
+    const char *encrypted_file,
+    const char *decrypted_file,
+    const unsigned char *key,
+    int key_size,
+    const unsigned char *aad,
+    int aad_length,
+    const unsigned char *nonce) {
 
+    /* Open the decrypted file */
+    FILE *decrypted_file_ptr = fopen(decrypted_file, "wb");
+    if (decrypted_file_ptr == NULL) {
+        printf("[ERROR] Failed to open decrypted file\n");
+        return;
+    }
+
+    /* Open the encrypted file */
+    FILE *encrypted_file_ptr = fopen(encrypted_file, "rb");
+    if (encrypted_file_ptr == NULL) {
+        printf("[ERROR] Failed to open encrypted file\n");
+        return;
+    }
+
+    /* Determine the size of the encrypted file */
+    fseek(encrypted_file_ptr, 0, SEEK_END);
+    int encrypted_file_size = ftell(encrypted_file_ptr);
+    fseek(encrypted_file_ptr, 0, SEEK_SET);
+
+    /* Subtract 16 due to the authentication tag */
+    encrypted_file_size -= 16;
+
+    /* Read the authentication tag from the file */
+    unsigned char auth_tag[16];
+    fread(auth_tag, 1, 16, encrypted_file_ptr);
+
+    /* Read the encrypted file into memory */
+    unsigned char *encrypted_data = (unsigned char *)malloc(encrypted_file_size);
+    fread(encrypted_data, 1, encrypted_file_size, encrypted_file_ptr);
+;
+
+    /* Decrypt the encrypted data */
+    aes_gcm_data_t *decrypted_data = aes_gcm_decrypt(
+        encrypted_data, encrypted_file_size, 
+        key, key_size,
+        aad, aad_length,
+        nonce,
+        auth_tag);
+
+    /* Check if the decrypted data is valid */
+    if (decrypted_data == NULL) {
+        printf("[ERROR] Failed to decrypt data\n");
+        return;
+    }
+
+    /* Write the decrypted data to the decrypted file */
+    fwrite(decrypted_data->output, 1, 
+        decrypted_data->output_length, decrypted_file_ptr);
+
+    /* Free any memory allocated */
+    free(encrypted_data);
+    free(decrypted_data);
+
+    /* Close the files */
+    fclose(encrypted_file_ptr);
+    fclose(decrypted_file_ptr);
+}

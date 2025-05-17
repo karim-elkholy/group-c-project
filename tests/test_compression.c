@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "utils/compression.h"
+#include "compression/compression.h"
 #include "test_shared.h"
 
 void test_compression() {
@@ -19,9 +19,9 @@ void test_compression() {
 
     /* Compressed & decompress the content */
     const char *compressed = "compressed.huffman";
-    compression_huffman(input, compressed);
+    huffman_compress(input, compressed);
     const char *decompressed = "decompressed.txt";
-    decompress_huffman(compressed, decompressed);
+    huffman_decompress(compressed, decompressed);
 
     /* Check if the decompressed file matches the original */
     FILE *decompressed_pointer = fopen(decompressed, "rb");
