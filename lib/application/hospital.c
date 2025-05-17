@@ -148,6 +148,13 @@ void print_menu(hospital_record_t *records) {
     printf("%s Management System\n", records->hospital_name);
     printf("--------------------------------\n");
 
+    /* taken from https://www.oocities.org/spunk1111/small.htm */
+    printf("                 _.-;;-._ \n");
+    printf("          '-..-'|   ||   |\n");
+    printf("          '-..-'|_.-;;-._|\n");
+    printf("          '-..-'|   ||   |\n");
+    printf("          '-..-'|_.-''-._|\n");
+
     /* Print the menu */
     printf("A. Signup as Patient\n");
     printf("P. Login as Patient\n");

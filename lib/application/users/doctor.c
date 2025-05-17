@@ -437,6 +437,13 @@ void update_patient_details_doctor(hospital_record_t *records)
  *******************************************************************************/
 void print_doctor_menu()
 {
+    /* taken from https://www.oocities.org/spunk1111/small.htm */
+    printf("                 _.-;;-._ \n");
+    printf("          '-..-'|   ||   |\n");
+    printf("          '-..-'|_.-;;-._|\n");
+    printf("          '-..-'|   ||   |\n");
+    printf("          '-..-'|_.-''-._|\n");
+
     printf("\n Doctor Menu \n"
            "1. Register a new patient\n"
            "2. View all patients\n"

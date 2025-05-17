@@ -487,6 +487,13 @@ void print_patient_menu() {
     printf("Patient Menu \n");
     printf("--------------------------------\n");
 
+    /* taken from https://www.oocities.org/spunk1111/small.htm */
+    printf("                 _.-;;-._ \n");
+    printf("          '-..-'|   ||   |\n");
+    printf("          '-..-'|_.-;;-._|\n");
+    printf("          '-..-'|   ||   |\n");
+    printf("          '-..-'|_.-''-._|\n");
+    
     printf("1. View records\n"
            "2. Update details\n"
            "X. Exit\n");
